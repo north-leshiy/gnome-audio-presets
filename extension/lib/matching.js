@@ -40,17 +40,9 @@ export function parseKey(key) {
     return {direction, match: {nodeName: rest}};
 }
 
-export function isInternalNode(name) {
-    return /_internal\./.test(name);
-}
-
-export function isMonitorNode(name) {
-    return name.endsWith('.monitor');
-}
-
-/** Nodes that are never shown. */
+/** Internal BlueZ nodes and monitor sources are never shown. */
 export function isIgnoredNode(name) {
-    return !name || isInternalNode(name) || isMonitorNode(name);
+    return !name || name.includes('_internal.') || name.endsWith('.monitor');
 }
 
 /**

@@ -1,9 +1,9 @@
-// Applying presets and picking a single device.
+// Applying presets and selecting single devices.
 //
-// Every apply is an "operation" with its own Gio.Cancellable; a new operation
-// cancels the previous one, and a cancelled operation switches nothing. If a
-// Bluetooth device is not connected, ask BlueZ to connect it and wait for its
-// node to appear in the catalog, up to the timeout.
+// Each request is an operation with its own Gio.Cancellable. A new request
+// cancels the previous one, and a cancelled operation switches nothing.
+// Bluetooth devices that are not connected are connected through BlueZ, then
+// the operation waits for their nodes to appear, up to the configured timeout.
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
@@ -11,7 +11,7 @@ import {Emitter} from './emitter.js';
 import {OUTPUT, INPUT} from './matching.js';
 import {readPresets, PRESETS_KEY, TIMEOUT_KEY} from './settings.js';
 
-/** printf-style %s/%d substitution in order; String.prototype.format exists only in the Shell. */
+/** Substitute %s/%d in order. String.prototype.format exists only in the Shell. */
 export function fmt(str, ...args) {
     let i = 0;
     return str.replace(/%[sd]/g, () => String(args[i++]));
@@ -38,7 +38,7 @@ export class PresetSwitcher extends Emitter {
      * @param {object|null} params.bluez     BluezClient
      * @param {Function} params.notify       (title, body) => void
      * @param {Function} [params.gettext]
-     * @param {number} [params.timeoutMs]    override for tests
+     * @param {number} [params.timeoutMs]    overrides the setting, for tests
      */
     constructor({catalog, mixer, settings, bluez, notify, gettext = s => s, timeoutMs = null}) {
         super();
@@ -47,7 +47,7 @@ export class PresetSwitcher extends Emitter {
         this._settings = settings;
         this._bluez = bluez;
         this._notify = notify;
-        this._ = gettext;
+        this._gettext = gettext;
         this._timeoutOverride = timeoutMs;
         this._op = null;
         this._presets = readPresets(settings);
@@ -125,7 +125,7 @@ export class PresetSwitcher extends Emitter {
     }
 
     async _doPreset(preset, op) {
-        const _ = this._;
+        const _ = this._gettext;
         const title = fmt(_('Could not apply “%s”'), preset.name);
         const out = this._catalog.lookup(preset.output);
         const inp = this._catalog.lookup(preset.input);
@@ -136,25 +136,21 @@ export class PresetSwitcher extends Emitter {
 
         try {
             await this._ensurePresent([inp, out], op);
-            this._setDefaults(out.key, inp.key);
-            return;
         } catch (e) {
-            if (isCancelled(e) || !(e instanceof SwitchError))
+            if (!(e instanceof SwitchError))
                 throw e;
-            // The input is missing: a fallback output will not help.
-            if (!this._catalog.lookup(inp.key)?.present) {
-                this._notify(title, e.message);
-                return;
-            }
+            // The fallback output is of no use when the input is missing.
             const fb = this._catalog.lookup(preset.fallbackOutput);
-            if (fb?.present) {
+            if (this._catalog.lookup(inp.key)?.present && fb?.present) {
                 this._setDefaults(fb.key, inp.key);
                 this._notify(fmt(_('%s is not available'), out.displayName),
                     fmt(_('%s. Switched to %s instead.'), e.message, fb.displayName));
-                return;
+            } else {
+                this._notify(title, e.message);
             }
-            this._notify(title, e.message);
+            return;
         }
+        this._setDefaults(out.key, inp.key);
     }
 
     async _doDevice(key, op) {
@@ -165,7 +161,7 @@ export class PresetSwitcher extends Emitter {
             await this._ensurePresent([entry], op);
         } catch (e) {
             if (e instanceof SwitchError) {
-                this._notify(fmt(this._('Could not switch to %s'), entry.displayName), e.message);
+                this._notify(fmt(this._gettext('Could not switch to %s'), entry.displayName), e.message);
                 return;
             }
             throw e;
@@ -191,7 +187,7 @@ export class PresetSwitcher extends Emitter {
      * right away; a Bluetooth one is connected and we wait for its node.
      */
     async _ensurePresent(entries, op) {
-        const _ = this._;
+        const _ = this._gettext;
         const missing = entries.filter(e => !e.present);
         if (!missing.length)
             return;
@@ -218,8 +214,8 @@ export class PresetSwitcher extends Emitter {
                     this._catalog.disconnect(changedId);
                 if (timeoutId)
                     GLib.source_remove(timeoutId);
-                // g_cancellable_disconnect() from the cancel handler deadlocks; a cancelled
-                // cancellable is single-use, so the handler can stay connected.
+                // g_cancellable_disconnect() deadlocks when called from the cancel
+                // handler. A cancelled cancellable is never reused, so leave it connected.
                 if (cancelId && !fromCancel)
                     op.cancellable.disconnect(cancelId);
                 if (err)
@@ -239,7 +235,7 @@ export class PresetSwitcher extends Emitter {
                     names, timeoutSec)));
                 return GLib.SOURCE_REMOVE;
             });
-            // Gio.Cancellable.connect (not GObject's): calls back at once if already cancelled.
+            // g_cancellable_connect(): runs the callback at once if already cancelled.
             cancelId = op.cancellable.connect(() => finish(cancelledError(), true));
             if (done)
                 return;

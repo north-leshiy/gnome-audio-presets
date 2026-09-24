@@ -1,5 +1,5 @@
-// Panel button: [output icon / input icon], microphone privacy indicator
-// and volume on scroll.
+// Panel button: output and input icons, microphone privacy indicator,
+// output volume on scroll.
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
@@ -11,7 +11,7 @@ import {OUTPUT, INPUT} from '../lib/matching.js';
 import {giconFor} from '../lib/icons.js';
 import {AudioMenu} from './menu.js';
 
-// As in the built-in InputStreamSlider: these apps "record" only to show a level meter.
+// As in the built-in InputStreamSlider: these apps record only to show a level meter.
 const SKIPPED_RECORDERS = ['org.gnome.VolumeControl', 'org.PulseAudio.pavucontrol'];
 
 export const AudioIndicator = GObject.registerClass(
@@ -20,6 +20,7 @@ class AudioPresetsIndicator extends PanelMenu.Button {
         super._init(0.5, _('Audio Presets'));
         this._catalog = catalog;
         this._mixer = mixer;
+        this._source = null;
 
         const box = new St.BoxLayout({style_class: 'panel-status-indicators-box'});
         this._outIcon = new St.Icon({style_class: 'system-status-icon'});
@@ -41,7 +42,6 @@ class AudioPresetsIndicator extends PanelMenu.Button {
             'stream-removed', () => this._syncPrivacy(),
             'default-source-changed', () => this._watchSource(), this);
         this.connect('scroll-event', (actor, event) => this._onScroll(event));
-        this.connect('destroy', () => this._onDestroy());
 
         this._watchSource();
         this._sync();
@@ -52,6 +52,7 @@ class AudioPresetsIndicator extends PanelMenu.Button {
         this._mixer.disconnectObject(this);
         this._source?.disconnectObject(this);
         this._audioMenu.destroy();
+        super._onDestroy();
     }
 
     _sync() {

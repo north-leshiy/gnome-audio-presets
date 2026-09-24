@@ -1,6 +1,5 @@
-// Popup menu content: preset row, device tiles, sliders.
-// The dynamic parts (preset buttons, tiles) are rebuilt on every catalog or
-// preset change: there are few of them, and their state derives from the model.
+// Popup menu content: preset tiles, device tiles and volume sliders.
+// The tiles are few, so they are rebuilt on every catalog or preset change.
 import Clutter from 'gi://Clutter';
 import St from 'gi://St';
 
@@ -23,9 +22,8 @@ function iconFor(entry) {
 }
 
 /**
- * Rows of PER_ROW equal cells. Returns add(actor) and finish(): finish pads the
- * last row with empty cells so that a lone tile does not stretch across the
- * whole width.
+ * Lays out actors in rows of PER_ROW equal cells. finish() pads the last row
+ * with empty cells, so a lone tile does not take the whole width.
  */
 function makeGrid(parent) {
     let row = null;
@@ -55,9 +53,13 @@ function makeTile({icons, label, checked, pending, dim, onClick, accessibleName}
     });
     const iconRow = new St.BoxLayout({x_align: Clutter.ActorAlign.CENTER});
     icons.forEach((icon, i) => {
-        if (i > 0)
-            iconRow.add_child(new St.Label({text: '/', style_class: 'audio-presets-slash',
-                y_align: Clutter.ActorAlign.CENTER}));
+        if (i > 0) {
+            iconRow.add_child(new St.Label({
+                text: '/',
+                style_class: 'audio-presets-slash',
+                y_align: Clutter.ActorAlign.CENTER,
+            }));
+        }
         iconRow.add_child(icon);
     });
     content.add_child(iconRow);
@@ -70,12 +72,11 @@ function makeTile({icons, label, checked, pending, dim, onClick, accessibleName}
     const button = new St.Button({
         child: content,
         style_class: 'audio-presets-tile',
-        toggle_mode: false,
         can_focus: true,
         x_expand: true,
+        checked,
         accessible_name: accessibleName ?? label,
     });
-    button.checked = checked;
     if (pending)
         button.add_style_class_name('audio-presets-pending');
     if (dim)
@@ -85,10 +86,6 @@ function makeTile({icons, label, checked, pending, dim, onClick, accessibleName}
 }
 
 export class AudioMenu {
-    /**
-     * @param {PopupMenu.PopupMenu} menu
-     * @param {object} deps
-     */
     constructor(menu, {catalog, switcher, mixer, openPreferences}) {
         this._menu = menu;
         this._catalog = catalog;
@@ -114,8 +111,8 @@ export class AudioMenu {
 
         menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(_('Input')));
         this._inputTiles = this._addTileSection();
-        this.inputSlider = new StreamSlider(mixer, INPUT);
-        menu.addMenuItem(this.inputSlider);
+        this._inputSlider = new StreamSlider(mixer, INPUT);
+        menu.addMenuItem(this._inputSlider);
 
         menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         menu.addAction(_('Audio Presets Settings'), () => this._openPreferences());
@@ -128,11 +125,11 @@ export class AudioMenu {
         this.sync();
     }
 
+    /** Disconnects from the models; the menu items are destroyed with the menu. */
     destroy() {
         for (const [obj, id] of this._ids)
             obj.disconnect(id);
         this._ids = [];
-        this._menu.removeAll();
     }
 
     _addTileSection() {
@@ -148,7 +145,7 @@ export class AudioMenu {
         this._syncTiles(OUTPUT, this._outputTiles);
         this._syncTiles(INPUT, this._inputTiles);
         this._syncSlider(OUTPUT, this.outputSlider);
-        this._syncSlider(INPUT, this.inputSlider);
+        this._syncSlider(INPUT, this._inputSlider);
     }
 
     _syncPresets() {

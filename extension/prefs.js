@@ -1,29 +1,27 @@
-// Preferences window: devices (visibility, name, icon) and presets.
+// Preferences window: presets, and per-device visibility, name and icon.
 //
-// Gvc is not available in the prefs process (it lives in the Shell's private
-// directory), so wired device presence comes from `pactl -f json` and Bluetooth
-// presence from BlueZ. Every edit is read-modify-write: the Shell may append new
-// devices to the same key at the same time, and its writes must not be lost.
+// Gvc is private to the Shell and not available here, so the presence of wired
+// devices comes from `pactl -f json` and of Bluetooth devices from BlueZ.
+// Every edit re-reads the setting before writing it: the Shell may add newly
+// seen devices to the same key at any time.
 import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Gtk from 'gi://Gtk';
 
-import {
-    ExtensionPreferences, gettext as _,
-} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {BluezClient} from './lib/bluez.js';
 import {ICONS, giconFor, defaultIconFor} from './lib/icons.js';
 import {OUTPUT, INPUT, findNodeName} from './lib/matching.js';
 import {
     readDevices, writeDevices, readPresets, writePresets, normalizePreset,
-    DEVICES_KEY, PRESETS_KEY, HIDE_NATIVE_KEY,
+    DEVICES_KEY, PRESETS_KEY, HIDE_NATIVE_KEY
 } from './lib/settings.js';
 
 Gio._promisify(Gio.Subprocess.prototype, 'communicate_utf8_async');
 
-/** Node names from pactl per direction; null on error (presence unknown). */
+/** Node names per direction from pactl, or null if that fails. */
 async function listNodeNames() {
     const run = async kind => {
         const proc = Gio.Subprocess.new(['pactl', '-f', 'json', 'list', 'short', kind],
@@ -60,8 +58,8 @@ function makeIconRow(currentId, onChange) {
         item.set_child(box);
     });
     factory.connect('bind', (f, item) => {
-        // For the selected value shown in the row itself get_position() does not match
-        // the model, so the icon is looked up by label.
+        // For the selected item shown in the row itself, get_position() is not
+        // the model position, so look the icon up by label.
         const label = item.get_item().get_string();
         const box = item.get_child();
         box.get_first_child().set_from_gicon(giconFor(ids[labels.indexOf(label)]));
@@ -144,8 +142,11 @@ class DevicesPage {
         const image = Gtk.Image.new_from_gicon(giconFor(iconId(dev)));
         row.add_prefix(image);
 
-        const visible = new Gtk.Switch({active: dev.visible, valign: Gtk.Align.CENTER,
-            tooltip_text: _('Show in menu')});
+        const visible = new Gtk.Switch({
+            active: dev.visible,
+            valign: Gtk.Align.CENTER,
+            tooltip_text: _('Show in menu'),
+        });
         visible.connect('notify::active', () => this._update(dev.key, {visible: visible.active}));
         row.add_suffix(visible);
 
@@ -155,11 +156,11 @@ class DevicesPage {
             show_apply_button: true,
         });
         if (dev.lastDescription)
-            nameRow.set_tooltip_text(fmtSystemName(dev.lastDescription));
+            nameRow.tooltip_text = _('System description: %s').replace('%s', dev.lastDescription);
         nameRow.connect('apply', () => {
             const name = nameRow.text.trim();
             this._update(dev.key, {name});
-            row.title = GLib.markup_escape_text(name || dev.lastDescription || dev.key, -1);
+            row.title = GLib.markup_escape_text(displayName({...dev, name}), -1);
         });
         row.add_row(nameRow);
 
@@ -177,10 +178,6 @@ class DevicesPage {
         row.add_row(systemRow);
         return row;
     }
-}
-
-function fmtSystemName(desc) {
-    return _('System description: %s').replace('%s', desc);
 }
 
 class PresetsPage {
@@ -231,8 +228,10 @@ class PresetsPage {
             this._rows.push(row);
         });
         if (!presets.length) {
-            const empty = new Adw.ActionRow({title: _('No presets yet'),
-                subtitle: _('Use the + button to add one')});
+            const empty = new Adw.ActionRow({
+                title: _('No presets yet'),
+                subtitle: _('Use the + button to add one'),
+            });
             this._group.add(empty);
             this._rows.push(empty);
         }
@@ -292,8 +291,11 @@ class PresetsPage {
                 p[field] = value;
         });
 
-        const nameRow = new Adw.EntryRow({title: _('Name'), text: preset.name,
-            show_apply_button: true});
+        const nameRow = new Adw.EntryRow({
+            title: _('Name'),
+            text: preset.name,
+            show_apply_button: true,
+        });
         nameRow.connect('apply', () => setField('name', nameRow.text.trim()));
         row.add_row(nameRow);
 
@@ -311,11 +313,20 @@ class PresetsPage {
             row.add_row(combo);
         }
 
-        const actions = new Gtk.Box({spacing: 6, halign: Gtk.Align.END,
-            margin_top: 6, margin_bottom: 6, margin_end: 6});
+        const actions = new Gtk.Box({
+            spacing: 6,
+            halign: Gtk.Align.END,
+            margin_top: 6,
+            margin_bottom: 6,
+            margin_end: 6,
+        });
         const button = (icon, tooltip, sensitive, cb, extra = []) => {
-            const b = new Gtk.Button({icon_name: icon, tooltip_text: tooltip, sensitive,
-                css_classes: ['flat', ...extra]});
+            const b = new Gtk.Button({
+                icon_name: icon,
+                tooltip_text: tooltip,
+                sensitive,
+                css_classes: ['flat', ...extra],
+            });
             b.connect('clicked', cb);
             actions.append(b);
         };
@@ -325,8 +336,7 @@ class PresetsPage {
             () => this._edit(list => list.splice(index + 1, 0, ...list.splice(index, 1))));
         button('user-trash-symbolic', _('Delete preset'), true,
             () => this._edit(list => list.splice(index, 1)), ['destructive-action']);
-        const actionsRow = new Adw.PreferencesRow({activatable: false, child: actions});
-        row.add_row(actionsRow);
+        row.add_row(new Adw.PreferencesRow({activatable: false, child: actions}));
         return row;
     }
 }
@@ -341,7 +351,7 @@ export default class AudioPresetsPreferences extends ExtensionPreferences {
                 if (dev.match.btAddress)
                     return Boolean(bluez.lookup(dev.match.btAddress)?.connected);
                 if (!this.nodes)
-                    return true; // unknown: do not flag the device as disconnected
+                    return true; // unknown, do not mark as disconnected
                 return Boolean(findNodeName(dev.match, dev.direction, this.nodes[dev.direction]));
             },
         };
@@ -351,7 +361,6 @@ export default class AudioPresetsPreferences extends ExtensionPreferences {
         window.add(presetsPage.widget);
         window.add(devicesPage.widget);
         window.set_default_size(620, 720);
-        window.search_enabled = false;
 
         const ids = [
             settings.connect(`changed::${DEVICES_KEY}`, () => {
@@ -360,8 +369,8 @@ export default class AudioPresetsPreferences extends ExtensionPreferences {
             }),
             settings.connect(`changed::${PRESETS_KEY}`, () => presetsPage.rebuild()),
         ];
-        // BlueZ sends PropertiesChanged often (RSSI while scanning): rebuild the
-        // page only when the connection state changes.
+        // BlueZ sends PropertiesChanged often (e.g. RSSI while scanning), so
+        // rebuild the page only when a connection state changes.
         const btSignature = () => bluez.audioDevices.map(d => `${d.address}:${d.connected}`).join();
         let lastBt = '';
         const bluezId = bluez.connect('changed', () => {
@@ -371,7 +380,9 @@ export default class AudioPresetsPreferences extends ExtensionPreferences {
                 devicesPage.rebuild();
             }
         });
+        let closed = false;
         window.connect('close-request', () => {
+            closed = true;
             ids.forEach(id => settings.disconnect(id));
             bluez.disconnect(bluezId);
             bluez.destroy();
@@ -379,7 +390,10 @@ export default class AudioPresetsPreferences extends ExtensionPreferences {
         });
 
         await bluez.start();
+        if (closed)
+            return;
         state.nodes = await listNodeNames();
-        devicesPage.rebuild();
+        if (!closed)
+            devicesPage.rebuild();
     }
 }

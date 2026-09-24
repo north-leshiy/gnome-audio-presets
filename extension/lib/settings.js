@@ -12,7 +12,7 @@ export const HIDE_NATIVE_KEY = 'hide-native-indicators';
 // Replaced in tests: console.warn is read-only in gjs.
 export const logger = {warn: msg => console.warn(msg)};
 
-const str = v => (typeof v === 'string' ? v : '');
+const str = v => typeof v === 'string' ? v : '';
 
 function parseArray(settings, key) {
     const raw = settings.get_string(key);
@@ -60,10 +60,9 @@ export function normalizeDevice(obj) {
     };
 }
 
-const validKeyOrNull = (key, direction) => {
-    const parsed = parseKey(key);
-    return parsed && parsed.direction === direction ? key : null;
-};
+function validKeyOrNull(key, direction) {
+    return parseKey(key)?.direction === direction ? key : null;
+}
 
 export function normalizePreset(obj, index = 0) {
     if (!obj || typeof obj !== 'object')

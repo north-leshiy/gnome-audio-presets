@@ -20,33 +20,27 @@ function unpack(v) {
 }
 
 /** Flatten Device1 properties into a device object. */
-export function deviceFromProps(path, props) {
+function deviceFromProps(path, props) {
     const address = normalizeMac(unpack(props.Address));
     if (!address)
         return null;
     const uuids = (unpack(props.UUIDs) ?? []).map(u => String(u).toLowerCase());
-    const icon = unpack(props.Icon) ?? '';
-    const audioIcon = icon.startsWith('audio-');
+    const audioIcon = (unpack(props.Icon) ?? '').startsWith('audio-');
     return {
         path,
         address,
         name: unpack(props.Alias) || unpack(props.Name) || address,
         paired: Boolean(unpack(props.Paired)),
         connected: Boolean(unpack(props.Connected)),
-        icon,
         hasOutput: uuids.includes(UUID_A2DP_SINK) || audioIcon,
         hasInput: uuids.includes(UUID_HFP_HF) || uuids.includes(UUID_HSP_HS),
     };
 }
 
-export function isPairedAudio(dev) {
-    return dev.paired && (dev.hasOutput || dev.hasInput);
-}
-
 export class BluezClient extends Emitter {
-    constructor({bus = Gio.DBus.system} = {}) {
+    constructor() {
         super();
-        this._bus = bus;
+        this._bus = Gio.DBus.system;
         this._devices = new Map(); // path -> device
         this._subs = [];
         this._cancellable = new Gio.Cancellable();
@@ -80,13 +74,13 @@ export class BluezClient extends Emitter {
             this.emit('changed');
         } catch (e) {
             if (!e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
-                console.log(`audio-presets: BlueZ unavailable: ${e.message}`);
+                console.debug(`audio-presets: BlueZ unavailable: ${e.message}`);
         }
     }
 
     /** Paired audio devices. */
     get audioDevices() {
-        return [...this._devices.values()].filter(isPairedAudio);
+        return [...this._devices.values()].filter(d => d.paired && (d.hasOutput || d.hasInput));
     }
 
     lookup(address) {
@@ -117,7 +111,7 @@ export class BluezClient extends Emitter {
     }
 
     _update(path, props, replace, notify = true) {
-        const base = replace ? {} : this._rawProps(path);
+        const base = replace ? {} : this._devices.get(path)?._raw;
         const merged = {...base, ...props};
         const dev = deviceFromProps(path, merged);
         if (!dev)
@@ -126,10 +120,6 @@ export class BluezClient extends Emitter {
         this._devices.set(path, dev);
         if (notify)
             this.emit('changed');
-    }
-
-    _rawProps(path) {
-        return this._devices.get(path)?._raw ?? {};
     }
 
     _subscribe(iface, member, arg0, callback) {

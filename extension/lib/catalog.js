@@ -5,7 +5,7 @@ import Gvc from 'gi://Gvc';
 
 import {Emitter} from './emitter.js';
 import {
-    OUTPUT, INPUT, makeKey, parseKey, findNodeName, matchForNodeName, isIgnoredNode,
+    OUTPUT, INPUT, makeKey, findNodeName, matchForNodeName, isIgnoredNode
 } from './matching.js';
 import {readDevices, writeDevices, normalizeDevice, Debouncer, DEVICES_KEY} from './settings.js';
 import {defaultIconFor} from './icons.js';
@@ -18,10 +18,10 @@ const WRITE_DELAY_MS = 2000;
  * @property {string} direction
  * @property {{nodeName?: string, btAddress?: string}} match
  * @property {boolean} visible
- * @property {string} name          user-defined name ('' when not set)
- * @property {string} icon          icon name ('' for the default)
+ * @property {string} name  user-defined name, '' when not set
+ * @property {string} icon  icon name, '' for the default
  * @property {string} lastDescription
- * @property {object|null} stream   Gvc.MixerStream when the node exists
+ * @property {object|null} stream  Gvc.MixerStream when the node exists
  * @property {boolean} present
  * @property {boolean} bluetooth
  * @property {string} displayName
@@ -122,14 +122,11 @@ export class DeviceCatalog extends Emitter {
 
         const entries = new Map();
         const addEntry = (rec, stream) => {
-            const bluetooth = Boolean(rec.match.btAddress);
             const entry = {
                 ...rec,
                 stream: stream ?? null,
                 present: Boolean(stream),
-                bluetooth,
-                btConnected: bluetooth
-                    ? Boolean(this._bluez?.lookup(rec.match.btAddress)?.connected) : false,
+                bluetooth: Boolean(rec.match.btAddress),
             };
             entry.displayName = rec.name || stream?.description || rec.lastDescription || rec.key;
             entry.iconName = rec.icon || defaultIconFor(entry);
@@ -211,5 +208,3 @@ export class DeviceCatalog extends Emitter {
         writeDevices(this._settings, current);
     }
 }
-
-export {parseKey};

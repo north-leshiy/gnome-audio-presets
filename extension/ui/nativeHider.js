@@ -1,9 +1,14 @@
-// Hiding the built-in volume icons in the top bar.
+// Hides the built-in volume icons in the top bar.
 //
-// quickSettings._volumeOutput/_volumeInput are private Shell fields, and the
-// Shell recomputes their visibility itself (_syncIndicatorsVisible, bind_property),
-// so hide() does not stick. The actors are removed from the _indicators container
-// and put back in place in restore(). Quick Settings sliders are other actors and stay.
+// There is no public API for this. quickSettings._volumeOutput/_volumeInput are
+// private fields, and the Shell keeps resetting their visibility
+// (_syncIndicatorsVisible, bind_property), so actor.hide() does not stick.
+// Instead the two actors are taken out of quickSettings._indicators and put
+// back at their original positions in restore(). The Quick Settings sliders
+// are separate actors and are not affected.
+//
+// The indicators are created asynchronously in QuickSettings._setupIndicators(),
+// so on startup hide() polls until they exist.
 import GLib from 'gi://GLib';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -42,7 +47,7 @@ export class NativeHider {
         if (this._waitId)
             GLib.source_remove(this._waitId);
         this._waitId = 0;
-        // Put them back in reverse order so the indexes match the original ones.
+        // Reverse order, so each saved index refers to the same neighbours.
         for (const {box, actor, index} of this._removed.reverse()) {
             if (actor.get_parent())
                 continue;
