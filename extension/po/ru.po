@@ -1,19 +1,20 @@
 # Russian translations for audio-presets.
 # Copyright (C) 2026 Иван Поддубный
-# This file is distributed under the same license as the audio-presets project.
+# This file is distributed under the same license as the audio-presets
+# project.
 # Иван Поддубный, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: audio-presets 1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-24 01:19+0300\n"
+"POT-Creation-Date: 2026-09-24 22:32+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Иван Поддубный\n"
 "Language: ru\n"
 "Language-Team: Russian\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || "
-"n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -114,108 +115,112 @@ msgstr "%s не подключились за %d с"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: prefs.js:67
+#: prefs.js:70
 msgid "Icon"
 msgstr "Иконка"
 
-#: prefs.js:82
+#: prefs.js:85
 msgid "Devices"
 msgstr "Устройства"
 
-#: prefs.js:104
+#: prefs.js:107
 msgid "Outputs"
 msgstr "Выходы"
 
-#: prefs.js:104
+#: prefs.js:107
 msgid "Inputs"
 msgstr "Входы"
 
-#: prefs.js:108
-msgid "Hidden devices are not shown in the menu. Names and icons are only used by this extension."
-msgstr "Скрытые устройства не показываются в меню. Имена и иконки видит только это расширение."
+#: prefs.js:111
+msgid ""
+"Hidden devices are not shown in the menu. Names and icons are only used "
+"by this extension."
+msgstr ""
+"Скрытые устройства не показываются в меню. Имена и иконки видит только "
+"это расширение."
 
-#: prefs.js:132
+#: prefs.js:135
 msgid "not connected"
 msgstr "не подключено"
 
-#: prefs.js:145
+#: prefs.js:148
 msgid "Show in menu"
 msgstr "Показывать в меню"
 
-#: prefs.js:150 prefs.js:292
+#: prefs.js:153 prefs.js:295
 msgid "Name"
 msgstr "Имя"
 
-#: prefs.js:169
+#: prefs.js:172
 msgid "System name"
 msgstr "Системное имя"
 
-#: prefs.js:180
+#: prefs.js:183
 #, python-format
 msgid "System description: %s"
 msgstr "Системное описание: %s"
 
-#: prefs.js:187 prefs.js:200
+#: prefs.js:190 prefs.js:203
 msgid "Presets"
 msgstr "Пресеты"
 
-#: prefs.js:191
+#: prefs.js:194
 msgid "General"
 msgstr "Общее"
 
-#: prefs.js:193
+#: prefs.js:196
 msgid "Hide built-in volume icons"
 msgstr "Скрывать встроенные значки громкости"
 
-#: prefs.js:194
+#: prefs.js:197
 msgid "The volume sliders in Quick Settings stay in place"
 msgstr "Слайдеры громкости в быстрых настройках остаются"
 
-#: prefs.js:201
+#: prefs.js:204
 msgid ""
-"A preset switches output and input together. The fallback output is used when the main one does "
-"not connect in time."
+"A preset switches output and input together. The fallback output is used "
+"when the main one does not connect in time."
 msgstr ""
-"Пресет переключает выход и вход одновременно. Запасной выход используется, если основной не "
-"подключился вовремя."
+"Пресет переключает выход и вход одновременно. Запасной выход "
+"используется, если основной не подключился вовремя."
 
-#: prefs.js:205
+#: prefs.js:208
 msgid "Add preset"
 msgstr "Добавить пресет"
 
-#: prefs.js:231
+#: prefs.js:234
 msgid "No presets yet"
 msgstr "Пресетов пока нет"
 
-#: prefs.js:232
+#: prefs.js:235
 msgid "Use the + button to add one"
 msgstr "Добавьте кнопкой +"
 
-#: prefs.js:247
+#: prefs.js:250
 msgid "New preset"
 msgstr "Новый пресет"
 
-#: prefs.js:256
+#: prefs.js:259
 msgid "None"
 msgstr "Нет"
 
-#: prefs.js:260
+#: prefs.js:263
 msgid "Unknown device"
 msgstr "Неизвестное устройство"
 
-#: prefs.js:300
+#: prefs.js:303
 msgid "Fallback output"
 msgstr "Запасной выход"
 
-#: prefs.js:319
+#: prefs.js:322
 msgid "Move up"
 msgstr "Выше"
 
-#: prefs.js:321
+#: prefs.js:324
 msgid "Move down"
 msgstr "Ниже"
 
-#: prefs.js:323
+#: prefs.js:326
 msgid "Delete preset"
 msgstr "Удалить пресет"
 
@@ -223,23 +228,23 @@ msgstr "Удалить пресет"
 msgid "Audio Presets"
 msgstr "Пресеты звука"
 
-#: ui/menu.js:94
+#: ui/menu.js:106
 msgid "No presets yet. Open settings to add one."
 msgstr "Пресетов пока нет. Откройте настройки, чтобы добавить."
 
-#: prefs.js:298 ui/menu.js:98
+#: prefs.js:301 ui/menu.js:110
 msgid "Output"
 msgstr "Выход"
 
-#: prefs.js:299 ui/menu.js:103
+#: prefs.js:302 ui/menu.js:115
 msgid "Input"
 msgstr "Вход"
 
-#: ui/menu.js:109
+#: ui/menu.js:121
 msgid "Audio Presets Settings"
 msgstr "Настройки пресетов звука"
 
-#: prefs.js:270 ui/menu.js:156
+#: prefs.js:273 ui/menu.js:168
 msgid "Unnamed preset"
 msgstr "Пресет без имени"
 

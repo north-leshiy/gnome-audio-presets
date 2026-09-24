@@ -1,5 +1,5 @@
-// Только чтение: каталог на настоящем Gvc и BlueZ, настройки в памяти.
-// Ничего не переключает и не подключает.
+// Read-only: the catalog on the real Gvc and BlueZ, settings in memory.
+// Switches nothing and connects nothing.
 //   GI_TYPELIB_PATH=/usr/lib/gnome-shell LD_LIBRARY_PATH=/usr/lib/gnome-shell gjs -m tests/catalog.probe.js
 import GLib from 'gi://GLib';
 import Gvc from 'gi://Gvc';

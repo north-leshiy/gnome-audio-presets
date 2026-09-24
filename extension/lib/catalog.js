@@ -1,6 +1,6 @@
-// Каталог устройств: сохранённые записи из GSettings + живые потоки Gvc +
-// привязанные BT-аудиоустройства из BlueZ. Единственный источник того, какие
-// устройства есть, как они называются и к какой ноде сейчас привязаны.
+// Device catalog: saved records from GSettings + live Gvc streams + paired
+// Bluetooth audio devices from BlueZ. The single source of which devices exist,
+// what they are called and which node each one is bound to right now.
 import Gvc from 'gi://Gvc';
 
 import {Emitter} from './emitter.js';
@@ -18,10 +18,10 @@ const WRITE_DELAY_MS = 2000;
  * @property {string} direction
  * @property {{nodeName?: string, btAddress?: string}} match
  * @property {boolean} visible
- * @property {string} name          пользовательское имя ('' — не задано)
- * @property {string} icon          имя иконки ('' — по умолчанию)
+ * @property {string} name          user-defined name ('' when not set)
+ * @property {string} icon          icon name ('' for the default)
  * @property {string} lastDescription
- * @property {object|null} stream   Gvc.MixerStream, если нода есть
+ * @property {object|null} stream   Gvc.MixerStream when the node exists
  * @property {boolean} present
  * @property {boolean} bluetooth
  * @property {string} displayName
@@ -35,7 +35,7 @@ export class DeviceCatalog extends Emitter {
         this._settings = settings;
         this._bluez = bluez;
         this._entries = new Map();
-        this._pending = new Map(); // key -> запись для слияния при записи
+        this._pending = new Map(); // key -> record to merge on the next write
         this._writer = new Debouncer(WRITE_DELAY_MS, () => this._flushPending());
         this._mixerIds = [];
         this._settingsId = 0;
@@ -71,7 +71,7 @@ export class DeviceCatalog extends Emitter {
         return this._mixer.get_state() === Gvc.MixerControlState.READY;
     }
 
-    /** @returns {CatalogEntry[]} все устройства направления в сохранённом порядке */
+    /** @returns {CatalogEntry[]} all devices of a direction, in saved order */
     list(direction) {
         return [...this._entries.values()].filter(e => e.direction === direction);
     }
@@ -81,7 +81,7 @@ export class DeviceCatalog extends Emitter {
         return key ? this._entries.get(key) ?? null : null;
     }
 
-    /** Ключ текущего устройства по умолчанию. */
+    /** Key of the current default device. */
     defaultKey(direction) {
         const stream = this.defaultStream(direction);
         return stream ? this.keyForStream(stream, direction) : null;
@@ -193,8 +193,8 @@ export class DeviceCatalog extends Emitter {
     }
 
     /**
-     * Слияние с тем, что лежит в настройках сейчас: prefs мог записать свои
-     * правки, пока наша запись ждала, — их не затираем.
+     * Merge with what is in the settings now: prefs may have written its edits
+     * while our write was pending, and those must not be overwritten.
      */
     _flushPending() {
         if (!this._pending.size)

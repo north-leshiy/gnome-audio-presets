@@ -1,5 +1,5 @@
-// Кнопка на панели: [иконка выхода / иконка входа], индикатор приватности
-// микрофона и громкость колёсиком.
+// Panel button: [output icon / input icon], microphone privacy indicator
+// and volume on scroll.
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
@@ -11,7 +11,7 @@ import {OUTPUT, INPUT} from '../lib/matching.js';
 import {giconFor} from '../lib/icons.js';
 import {AudioMenu} from './menu.js';
 
-// Как в родном InputStreamSlider: эти приложения «пишут» только ради индикатора уровня.
+// As in the built-in InputStreamSlider: these apps "record" only to show a level meter.
 const SKIPPED_RECORDERS = ['org.gnome.VolumeControl', 'org.PulseAudio.pavucontrol'];
 
 export const AudioIndicator = GObject.registerClass(
@@ -69,7 +69,7 @@ class AudioPresetsIndicator extends PanelMenu.Button {
         icon.gicon = giconFor(entry?.iconName ?? missingIcon);
     }
 
-    /** Следим за mute текущего входа: от него зависит индикатор приватности. */
+    /** Track mute of the current input: the privacy indicator depends on it. */
     _watchSource() {
         this._source?.disconnectObject(this);
         this._source = this._catalog.defaultStream(INPUT);

@@ -1,9 +1,9 @@
-// Применение пресетов и ручной выбор устройства.
+// Applying presets and picking a single device.
 //
-// Каждое применение — «операция» со своим Gio.Cancellable; новая операция
-// отменяет предыдущую, и отменённая уже ничего не переключает. Если нужное
-// Bluetooth-устройство не подключено, просим BlueZ подключить его и ждём
-// появления ноды в каталоге не дольше таймаута.
+// Every apply is an "operation" with its own Gio.Cancellable; a new operation
+// cancels the previous one, and a cancelled operation switches nothing. If a
+// Bluetooth device is not connected, ask BlueZ to connect it and wait for its
+// node to appear in the catalog, up to the timeout.
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
@@ -11,7 +11,7 @@ import {Emitter} from './emitter.js';
 import {OUTPUT, INPUT} from './matching.js';
 import {readPresets, PRESETS_KEY, TIMEOUT_KEY} from './settings.js';
 
-/** printf-подстановка %s/%d по порядку; String.prototype.format есть только в Shell. */
+/** printf-style %s/%d substitution in order; String.prototype.format exists only in the Shell. */
 export function fmt(str, ...args) {
     let i = 0;
     return str.replace(/%[sd]/g, () => String(args[i++]));
@@ -26,7 +26,7 @@ function isCancelled(e) {
 const cancelledError = () =>
     new GLib.Error(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED, 'cancelled');
 
-// Ответы BlueZ, после которых подключение всё равно может завершиться.
+// BlueZ replies after which the connection may still complete.
 const BENIGN_CONNECT_ERRORS = /InProgress|AlreadyConnected|AlreadyExists/;
 
 export class PresetSwitcher extends Emitter {
@@ -34,11 +34,11 @@ export class PresetSwitcher extends Emitter {
      * @param {object} params
      * @param {import('./catalog.js').DeviceCatalog} params.catalog
      * @param {object} params.mixer          Gvc.MixerControl
-     * @param {object} params.settings       Gio.Settings расширения
+     * @param {object} params.settings       the extension's Gio.Settings
      * @param {object|null} params.bluez     BluezClient
      * @param {Function} params.notify       (title, body) => void
      * @param {Function} [params.gettext]
-     * @param {number} [params.timeoutMs]    переопределение для тестов
+     * @param {number} [params.timeoutMs]    override for tests
      */
     constructor({catalog, mixer, settings, bluez, notify, gettext = s => s, timeoutMs = null}) {
         super();
@@ -73,12 +73,12 @@ export class PresetSwitcher extends Emitter {
         return this._presets;
     }
 
-    /** Что сейчас применяется: {kind: 'preset'|'device', id} или null. */
+    /** What is being applied right now: {kind: 'preset'|'device', id} or null. */
     get pending() {
         return this._op ? {kind: this._op.kind, id: this._op.id} : null;
     }
 
-    /** id первого пресета, чья пара совпадает с текущими default. */
+    /** id of the first preset whose pair matches the current defaults. */
     get activePresetId() {
         const out = this._catalog.defaultKey(OUTPUT);
         const inp = this._catalog.defaultKey(INPUT);
@@ -141,7 +141,7 @@ export class PresetSwitcher extends Emitter {
         } catch (e) {
             if (isCancelled(e) || !(e instanceof SwitchError))
                 throw e;
-            // Вход недоступен — запасной выход не поможет.
+            // The input is missing: a fallback output will not help.
             if (!this._catalog.lookup(inp.key)?.present) {
                 this._notify(title, e.message);
                 return;
@@ -176,7 +176,7 @@ export class PresetSwitcher extends Emitter {
             this._setDefaults(null, key);
     }
 
-    /** Вход ставим раньше выхода: так BT-наушники не уходят в режим гарнитуры. */
+    /** Set the input before the output so BT headphones do not switch to headset mode. */
     _setDefaults(outKey, inKey) {
         const inp = this._catalog.lookup(inKey);
         const out = this._catalog.lookup(outKey);
@@ -187,8 +187,8 @@ export class PresetSwitcher extends Emitter {
     }
 
     /**
-     * Дождаться, пока все устройства будут присутствовать. Отсутствующие
-     * проводные — сразу ошибка; Bluetooth — подключаем и ждём ноду.
+     * Wait until all devices are present. A missing wired device is an error
+     * right away; a Bluetooth one is connected and we wait for its node.
      */
     async _ensurePresent(entries, op) {
         const _ = this._;
@@ -218,8 +218,8 @@ export class PresetSwitcher extends Emitter {
                     this._catalog.disconnect(changedId);
                 if (timeoutId)
                     GLib.source_remove(timeoutId);
-                // g_cancellable_disconnect() из обработчика отмены — deadlock;
-                // после отмены cancellable одноразовый, обработчик можно оставить.
+                // g_cancellable_disconnect() from the cancel handler deadlocks; a cancelled
+                // cancellable is single-use, so the handler can stay connected.
                 if (cancelId && !fromCancel)
                     op.cancellable.disconnect(cancelId);
                 if (err)
@@ -239,7 +239,7 @@ export class PresetSwitcher extends Emitter {
                     names, timeoutSec)));
                 return GLib.SOURCE_REMOVE;
             });
-            // Gio.Cancellable.connect (не GObject): сразу зовёт callback, если уже отменено.
+            // Gio.Cancellable.connect (not GObject's): calls back at once if already cancelled.
             cancelId = op.cancellable.connect(() => finish(cancelledError(), true));
             if (done)
                 return;

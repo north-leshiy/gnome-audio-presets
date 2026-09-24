@@ -1,12 +1,12 @@
-// Курированный набор иконок устройств — один на Shell и prefs.
-// Свои SVG лежат в extension/icons и грузятся как файлы: имя *-symbolic.svg
-// достаточно, чтобы St и GTK перекрашивали их в цвет темы.
+// Curated set of device icons, shared by the Shell and prefs.
+// Bundled SVGs live in extension/icons and are loaded as files: a *-symbolic.svg
+// name is enough for St and GTK to recolor them with the theme.
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
 import {OUTPUT} from './matching.js';
 
-// Помечает строку для xgettext; перевод делает вызывающий через _().
+// Marks a string for xgettext; the caller translates it with _().
 const N_ = s => s;
 
 const ICONS_DIR = GLib.build_filenamev([
@@ -42,7 +42,7 @@ export function giconFor(id) {
     return new Gio.ThemedIcon({name: id});
 }
 
-/** Иконка по умолчанию, пока пользователь не выбрал свою. */
+/** Default icon until the user picks one. */
 export function defaultIconFor({direction, bluetooth, match, stream}) {
     const name = (match?.nodeName ?? '').toLowerCase();
     const ff = stream?.form_factor ?? '';

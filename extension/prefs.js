@@ -1,9 +1,9 @@
-// Окно настроек: устройства (видимость, имя, иконка) и пресеты.
+// Preferences window: devices (visibility, name, icon) and presets.
 //
-// Gvc в процессе prefs недоступен (лежит в приватном каталоге Shell), поэтому
-// присутствие проводных устройств узнаём у `pactl -f json`, а Bluetooth — у BlueZ.
-// Каждая правка — чтение-изменение-запись: Shell параллельно дописывает новые
-// устройства в тот же ключ, и затирать его записи нельзя.
+// Gvc is not available in the prefs process (it lives in the Shell's private
+// directory), so wired device presence comes from `pactl -f json` and Bluetooth
+// presence from BlueZ. Every edit is read-modify-write: the Shell may append new
+// devices to the same key at the same time, and its writes must not be lost.
 import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -23,7 +23,7 @@ import {
 
 Gio._promisify(Gio.Subprocess.prototype, 'communicate_utf8_async');
 
-/** Имена нод из pactl по направлению; при ошибке — null (присутствие неизвестно). */
+/** Node names from pactl per direction; null on error (presence unknown). */
 async function listNodeNames() {
     const run = async kind => {
         const proc = Gio.Subprocess.new(['pactl', '-f', 'json', 'list', 'short', kind],
@@ -47,7 +47,7 @@ function iconId(dev) {
     return dev.icon || defaultIconFor({...dev, bluetooth: Boolean(dev.match.btAddress)});
 }
 
-/** Выпадающий список с иконками из курированного набора. */
+/** Combo row with icons from the curated set. */
 function makeIconRow(currentId, onChange) {
     const ids = ICONS.map(i => i.id);
     const labels = ICONS.map(i => _(i.label));
@@ -60,8 +60,8 @@ function makeIconRow(currentId, onChange) {
         item.set_child(box);
     });
     factory.connect('bind', (f, item) => {
-        // Для выбранного значения в самой строке get_position() не соответствует
-        // модели, поэтому иконку ищем по подписи.
+        // For the selected value shown in the row itself get_position() does not match
+        // the model, so the icon is looked up by label.
         const label = item.get_item().get_string();
         const box = item.get_child();
         box.get_first_child().set_from_gicon(giconFor(ids[labels.indexOf(label)]));
@@ -90,7 +90,7 @@ class DevicesPage {
         this.rebuild();
     }
 
-    /** Пересборка только при смене набора устройств — не мешает вводу имени. */
+    /** Rebuild only when the set of devices changes, so typing a name is not interrupted. */
     maybeRebuild() {
         const keys = readDevices(this._settings).map(d => d.key).join('\n');
         if (keys !== this._keys)
@@ -341,7 +341,7 @@ export default class AudioPresetsPreferences extends ExtensionPreferences {
                 if (dev.match.btAddress)
                     return Boolean(bluez.lookup(dev.match.btAddress)?.connected);
                 if (!this.nodes)
-                    return true; // неизвестно — не пугаем пометкой
+                    return true; // unknown: do not flag the device as disconnected
                 return Boolean(findNodeName(dev.match, dev.direction, this.nodes[dev.direction]));
             },
         };
@@ -360,8 +360,8 @@ export default class AudioPresetsPreferences extends ExtensionPreferences {
             }),
             settings.connect(`changed::${PRESETS_KEY}`, () => presetsPage.rebuild()),
         ];
-        // BlueZ шлёт PropertiesChanged часто (RSSI при поиске) — пересобираем
-        // страницу только когда меняется статус подключения.
+        // BlueZ sends PropertiesChanged often (RSSI while scanning): rebuild the
+        // page only when the connection state changes.
         const btSignature = () => bluez.audioDevices.map(d => `${d.address}:${d.connected}`).join();
         let lastBt = '';
         const bluezId = bluez.connect('changed', () => {

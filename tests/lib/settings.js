@@ -1,4 +1,4 @@
-// Gio.Settings расширения на memory-бэкенде: реальный dconf не трогается.
+// The extension's Gio.Settings on the memory backend: the real dconf is not touched.
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 

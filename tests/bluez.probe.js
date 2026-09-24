@@ -1,4 +1,4 @@
-// Только чтение: выводит привязанные аудиоустройства BlueZ. Ничего не подключает.
+// Read-only: prints paired BlueZ audio devices. Connects nothing.
 //   gjs -m tests/bluez.probe.js
 import GLib from 'gi://GLib';
 

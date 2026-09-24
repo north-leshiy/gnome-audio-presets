@@ -1,6 +1,6 @@
-// Содержимое всплывающего меню: ряд пресетов, плитки устройств, слайдеры.
-// Динамические части (кнопки пресетов, плитки) пересобираются целиком на
-// каждое изменение каталога/пресетов — их мало, а состояние выводится из модели.
+// Popup menu content: preset row, device tiles, sliders.
+// The dynamic parts (preset buttons, tiles) are rebuilt on every catalog or
+// preset change: there are few of them, and their state derives from the model.
 import Clutter from 'gi://Clutter';
 import St from 'gi://St';
 
@@ -23,9 +23,9 @@ function iconFor(entry) {
 }
 
 /**
- * Строки по PER_ROW одинаковых ячеек. Возвращает add(actor) и finish():
- * finish добивает последнюю строку пустыми ячейками, чтобы одиночная плитка
- * не растягивалась на всю ширину.
+ * Rows of PER_ROW equal cells. Returns add(actor) and finish(): finish pads the
+ * last row with empty cells so that a lone tile does not stretch across the
+ * whole width.
  */
 function makeGrid(parent) {
     let row = null;

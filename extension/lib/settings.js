@@ -1,5 +1,5 @@
-// Чтение и запись JSON-ключей GSettings. Общий модуль для Shell, prefs и тестов:
-// импортирует только GLib, объект Gio.Settings передаётся снаружи.
+// Reading and writing the JSON keys in GSettings. Shared by the Shell, prefs and
+// tests: imports only GLib, the Gio.Settings object is passed in.
 import GLib from 'gi://GLib';
 
 import {OUTPUT, INPUT, makeKey, parseKey, normalizeMac} from './matching.js';
@@ -9,7 +9,7 @@ export const PRESETS_KEY = 'presets';
 export const TIMEOUT_KEY = 'bt-connect-timeout';
 export const HIDE_NATIVE_KEY = 'hide-native-indicators';
 
-// Подменяется в тестах: console.warn в gjs доступен только для чтения.
+// Replaced in tests: console.warn is read-only in gjs.
 export const logger = {warn: msg => console.warn(msg)};
 
 const str = v => (typeof v === 'string' ? v : '');
@@ -28,8 +28,8 @@ function parseArray(settings, key) {
 }
 
 /**
- * Привести запись устройства к каноническому виду или вернуть null.
- * Ключ всегда пересчитывается из direction+match, сохранённому не верим.
+ * Bring a device record into canonical form, or return null.
+ * The key is always recomputed from direction+match; the stored one is not trusted.
  */
 export function normalizeDevice(obj) {
     if (!obj || typeof obj !== 'object')
@@ -117,7 +117,7 @@ export function writePresets(settings, presets) {
     writeIfChanged(settings, PRESETS_KEY, presets.map(normalizePreset).filter(Boolean));
 }
 
-/** Отложенный вызов: повторные schedule() в пределах delay схлопываются. */
+/** Deferred call: repeated schedule() calls within the delay collapse into one. */
 export class Debouncer {
     constructor(delayMs, fn) {
         this._delay = delayMs;
@@ -135,7 +135,7 @@ export class Debouncer {
         });
     }
 
-    /** Выполнить отложенное сейчас (например, в disable()). */
+    /** Run the pending call now (e.g. in disable()). */
     flush() {
         if (!this._id)
             return;

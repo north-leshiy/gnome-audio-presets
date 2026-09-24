@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: audio-presets VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-24 01:19+0300\n"
+"POT-Creation-Date: 2026-09-24 22:32+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -113,108 +113,108 @@ msgstr ""
 msgid "%s: %s"
 msgstr ""
 
-#: prefs.js:67
+#: prefs.js:70
 msgid "Icon"
 msgstr ""
 
-#: prefs.js:82
+#: prefs.js:85
 msgid "Devices"
 msgstr ""
 
-#: prefs.js:104
+#: prefs.js:107
 msgid "Outputs"
 msgstr ""
 
-#: prefs.js:104
+#: prefs.js:107
 msgid "Inputs"
 msgstr ""
 
-#: prefs.js:108
+#: prefs.js:111
 msgid ""
 "Hidden devices are not shown in the menu. Names and icons are only used "
 "by this extension."
 msgstr ""
 
-#: prefs.js:132
+#: prefs.js:135
 msgid "not connected"
 msgstr ""
 
-#: prefs.js:145
+#: prefs.js:148
 msgid "Show in menu"
 msgstr ""
 
-#: prefs.js:150 prefs.js:292
+#: prefs.js:153 prefs.js:295
 msgid "Name"
 msgstr ""
 
-#: prefs.js:169
+#: prefs.js:172
 msgid "System name"
 msgstr ""
 
-#: prefs.js:180
+#: prefs.js:183
 #, python-format
 msgid "System description: %s"
 msgstr ""
 
-#: prefs.js:187 prefs.js:200
+#: prefs.js:190 prefs.js:203
 msgid "Presets"
 msgstr ""
 
-#: prefs.js:191
+#: prefs.js:194
 msgid "General"
 msgstr ""
 
-#: prefs.js:193
+#: prefs.js:196
 msgid "Hide built-in volume icons"
 msgstr ""
 
-#: prefs.js:194
+#: prefs.js:197
 msgid "The volume sliders in Quick Settings stay in place"
 msgstr ""
 
-#: prefs.js:201
+#: prefs.js:204
 msgid ""
 "A preset switches output and input together. The fallback output is used "
 "when the main one does not connect in time."
 msgstr ""
 
-#: prefs.js:205
+#: prefs.js:208
 msgid "Add preset"
 msgstr ""
 
-#: prefs.js:231
+#: prefs.js:234
 msgid "No presets yet"
 msgstr ""
 
-#: prefs.js:232
+#: prefs.js:235
 msgid "Use the + button to add one"
 msgstr ""
 
-#: prefs.js:247
+#: prefs.js:250
 msgid "New preset"
 msgstr ""
 
-#: prefs.js:256
+#: prefs.js:259
 msgid "None"
 msgstr ""
 
-#: prefs.js:260
+#: prefs.js:263
 msgid "Unknown device"
 msgstr ""
 
-#: prefs.js:300
+#: prefs.js:303
 msgid "Fallback output"
 msgstr ""
 
-#: prefs.js:319
+#: prefs.js:322
 msgid "Move up"
 msgstr ""
 
-#: prefs.js:321
+#: prefs.js:324
 msgid "Move down"
 msgstr ""
 
-#: prefs.js:323
+#: prefs.js:326
 msgid "Delete preset"
 msgstr ""
 
@@ -222,23 +222,23 @@ msgstr ""
 msgid "Audio Presets"
 msgstr ""
 
-#: ui/menu.js:94
+#: ui/menu.js:106
 msgid "No presets yet. Open settings to add one."
 msgstr ""
 
-#: prefs.js:298 ui/menu.js:98
+#: prefs.js:301 ui/menu.js:110
 msgid "Output"
 msgstr ""
 
-#: prefs.js:299 ui/menu.js:103
+#: prefs.js:302 ui/menu.js:115
 msgid "Input"
 msgstr ""
 
-#: ui/menu.js:109
+#: ui/menu.js:121
 msgid "Audio Presets Settings"
 msgstr ""
 
-#: prefs.js:270 ui/menu.js:156
+#: prefs.js:273 ui/menu.js:168
 msgid "Unnamed preset"
 msgstr ""
 

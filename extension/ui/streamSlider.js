@@ -1,6 +1,6 @@
-// Слайдер громкости одного потока Gvc: имя устройства, кнопка mute, ползунок.
-// Логика громкости повторяет родной StreamSlider из ui/status/volume.js
-// (классы там не экспортированы), но без меню выбора устройств.
+// Volume slider for one Gvc stream: device name, mute button, slider.
+// The volume logic follows the built-in StreamSlider in ui/status/volume.js
+// (its classes are not exported), without the device selection menu.
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -107,7 +107,7 @@ class AudioPresetsStreamSlider extends PopupMenu.PopupBaseMenuItem {
         this._label.text = text ?? '';
     }
 
-    /** Шаг колёсиком с панели; возвращает true, если громкость изменилась. */
+    /** One scroll step from the panel; returns true if the volume changed. */
     step(nSteps) {
         return this._stream ? this.slider.step(nSteps) : false;
     }
@@ -169,7 +169,7 @@ class AudioPresetsStreamSlider extends PopupMenu.PopupBaseMenuItem {
         this._volumeCancellable?.cancel();
         this._volumeCancellable = null;
         if (this._stream.state === Gvc.MixerStreamState.RUNNING)
-            return; // пока играет звук, отдельный сигнал не нужен
+            return; // no separate feedback sound while audio is playing
         this._volumeCancellable = new Gio.Cancellable();
         global.display.get_sound_player().play_from_theme('audio-volume-change',
             _('Volume changed'), this._volumeCancellable);

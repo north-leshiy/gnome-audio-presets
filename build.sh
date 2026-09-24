@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Сборка расширения audio-presets.
-#   ./build.sh         схема + переводы (достаточно для симлинка)
-#   ./build.sh pot     обновить шаблон po/audio-presets.pot из исходников
-#   ./build.sh pack    zip для gnome-extensions install
+# Build the audio-presets extension.
+#   ./build.sh         schema + translations (enough for a symlinked install)
+#   ./build.sh pot     refresh po/audio-presets.pot from the sources
+#   ./build.sh pack    zip for gnome-extensions install
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 EXT="$ROOT/extension"
 DOMAIN=audio-presets
 
-# Переводы: GNU gettext, если установлен, иначе Python Babel (pybabel).
+# Translations: GNU gettext when installed, otherwise Python Babel (pybabel).
 have() { command -v "$1" >/dev/null; }
 
 compile() {
@@ -55,18 +55,33 @@ pot() {
   return 0
 }
 
+# VERSION_NAME=1.2.0 ./build.sh pack puts the version into metadata.json as version-name.
 pack() {
   compile
-  # locale/ уже скомпилирован в compile(). Пакуем копию без po/: увидев po/,
-  # gnome-extensions pack сам зовёт msgfmt, а он есть не везде.
-  local stage
+  # locale/ is already compiled by compile(). Pack a copy without po/ and without
+  # the compiled schema: when it sees po/, gnome-extensions pack runs msgfmt itself,
+  # and Shell 45+ does not need gschemas.compiled.
+  local stage uuid zip
   stage=$(mktemp -d)
   cp -r "$EXT"/. "$stage"
-  rm -rf "$stage/po"
-  (cd "$stage" && gnome-extensions pack --force --out-dir="$ROOT" \
-    --extra-source=lib --extra-source=ui --extra-source=icons --extra-source=locale \
-    --extra-source=LICENSE --extra-source=NOTICE .)
+  rm -rf "$stage/po" "$stage/schemas/gschemas.compiled"
+  if [[ -n ${VERSION_NAME:-} ]]; then
+    jq --arg v "$VERSION_NAME" '. + {"version-name": $v}' "$EXT/metadata.json" >"$stage/metadata.json"
+  fi
+  uuid=$(jq -r .uuid "$EXT/metadata.json")
+  zip="$ROOT/$uuid.shell-extension.zip"
+  rm -f "$zip"
+  if have gnome-extensions; then
+    (cd "$stage" && gnome-extensions pack --force --out-dir="$ROOT" \
+      --extra-source=lib --extra-source=ui --extra-source=icons --extra-source=locale \
+      --extra-source=LICENSE --extra-source=NOTICE .)
+  else
+    # Without GNOME Shell (e.g. in CI): the same set of files with plain zip.
+    (cd "$stage" && zip -qr "$zip" metadata.json extension.js prefs.js stylesheet.css \
+      lib ui icons locale schemas LICENSE NOTICE)
+  fi
   rm -rf "$stage"
+  echo "$zip"
 }
 
 case "${1:-}" in

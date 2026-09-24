@@ -1,5 +1,5 @@
-/* St — подмножество CSS: нет flex/grid, opacity, dashed-границ.
-   Полупрозрачность отсутствующих устройств задаётся из кода. */
+/* St supports a subset of CSS: no flex/grid, opacity or dashed borders.
+   Absent devices are dimmed from code. */
 
 .audio-presets-panel-slash {
     padding: 0 1px;

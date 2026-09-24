@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Вложенный GNOME Shell (devkit) в полностью изолированном окружении:
-# своя шина D-Bus, свой dconf (XDG_CONFIG_HOME), свой каталог расширений
-# (XDG_DATA_HOME) — включены только audio-presets и тестовый помощник.
-# Настройки и расширения основной сессии не трогаются.
-# PipeWire и BlueZ — НАСТОЯЩИЕ: пресет во вложенном Shell переключит реальный звук.
+# Nested GNOME Shell (devkit) in a fully isolated environment: its own D-Bus
+# session, dconf (XDG_CONFIG_HOME) and extensions directory (XDG_DATA_HOME);
+# only audio-presets and the test helper are enabled.
+# Settings and extensions of the main session are not touched.
+# PipeWire and BlueZ are REAL: a preset in the nested Shell switches real audio.
 #
-#   tests/devkit.sh start [--seed] [extra-uuid ...]   запустить в фоне
-#     --seed — записать пресеты скриптом $DEVKIT_SEED (по умолчанию examples/setup-example.sh)
-#   tests/devkit.sh eval 'JS'                           выполнить JS во вложенном Shell
-#   tests/devkit.sh shot out.png                        скриншот вложенного Shell
-#   tests/devkit.sh click X Y                           клик во вложенном Shell
-#   tests/devkit.sh log                                 путь к логу
+#   tests/devkit.sh start [--seed] [extra-uuid ...]   start in the background
+#     --seed writes presets with $DEVKIT_SEED (default: examples/setup-example.sh)
+#   tests/devkit.sh eval 'JS'                           run JS in the nested Shell
+#   tests/devkit.sh shot out.png                        screenshot of the nested Shell
+#   tests/devkit.sh click X Y                           click in the nested Shell
+#   tests/devkit.sh log                                 path to the log
 #   tests/devkit.sh stop
 set -euo pipefail
 
@@ -36,15 +36,15 @@ start() {
   mkdir -p "$STATE/config" "$STATE/data/gnome-shell/extensions"
   ln -sfn "$ROOT/extension" "$STATE/data/gnome-shell/extensions/audio-presets@north-leshiy.github.io"
   ln -sfn "$ROOT/tests/devkit-helper" "$STATE/data/gnome-shell/extensions/devkit-helper@audio-presets.test"
-  # Расширения основной сессии, если попросили (например, QSAP для проверки совместимости).
+  # Extensions of the main session, if asked for (e.g. to check compatibility).
   local u
   for u in "${extra[@]}"; do
     ln -sfn "$HOME/.local/share/gnome-shell/extensions/$u" "$STATE/data/gnome-shell/extensions/$u"
   done
 
-  # ВАЖНО: окружение изоляции выставляется ДО запуска dbus-daemon. Сервисы
-  # (dconf-service!) активируются шиной с её окружением; без этого dconf-service
-  # пишет в настоящий ~/.config/dconf/user основной сессии.
+  # IMPORTANT: the isolation environment is set BEFORE dbus-daemon starts. The bus
+  # activates services (dconf-service!) with its own environment; otherwise
+  # dconf-service writes to the real ~/.config/dconf/user of the main session.
   export XDG_CONFIG_HOME=$STATE/config
   export XDG_DATA_HOME=$STATE/data
   local real_dconf=$HOME/.config/dconf/user before
@@ -58,8 +58,8 @@ start() {
   echo "$pid" >"$PIDS_FILE"
   export DBUS_SESSION_BUS_ADDRESS=$addr
 
-  # Проверка изоляции ДО любой записи: поднять dconf-service на этой шине и
-  # убедиться по его окружению, что он пишет в $STATE/config.
+  # Check isolation BEFORE any write: start dconf-service on this bus and make
+  # sure from its environment that it writes to $STATE/config.
   gdbus introspect --address "$addr" --dest ca.desrt.dconf \
     --object-path /ca/desrt/dconf/Writer/user >/dev/null
   local dconf_pid dconf_cfg
@@ -74,7 +74,7 @@ start() {
     exit 1
   fi
 
-  # Второй рубеж: после первой записи настоящая база не должна измениться.
+  # Second line of defence: the real database must not change after the first write.
   gsettings set org.gnome.shell welcome-dialog-last-shown-version '999'
   if [[ $(stat -c %Y.%s "$real_dconf" 2>/dev/null || echo none) != "$before" ]]; then
     echo "ABORT: nested dconf is not isolated, real $real_dconf changed" >&2
@@ -90,15 +90,15 @@ start() {
     "${DEVKIT_SEED:-$ROOT/examples/setup-example.sh}" >/dev/null
   fi
 
-  # DEVKIT_HEADLESS=1 — без окна на экране, с виртуальным монитором: так
-  # надёжнее для скриншотов окон GTK (во вложенном режиме они иногда не рисуются).
+  # DEVKIT_HEADLESS=1: no window on screen, a virtual monitor instead; more
+  # reliable for screenshots of GTK windows (in nested mode they sometimes do not draw).
   if [[ -n ${DEVKIT_HEADLESS:-} ]]; then
     gnome-shell --headless --virtual-monitor 1280x800 --wayland --no-x11 >"$LOG" 2>&1 &
   else
     gnome-shell --devkit --wayland >"$LOG" 2>&1 &
   fi
   echo $! >>"$PIDS_FILE"
-  # ждём, пока Shell займёт имя на шине
+  # wait until the Shell owns its name on the bus
   local _
   for _ in $(seq 50); do
     if gdbus call --address "$addr" --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
@@ -134,9 +134,9 @@ shell_eval() {
   [[ $reply == "(true,"* ]]
 }
 
-# Клик левой кнопкой в координатах вложенного Shell (виртуальный указатель Clutter).
-# Движение, нажатие и отпускание — отдельными вызовами с паузами: окна GTK
-# игнорируют клик, пришедший в одном пакете с входом указателя на поверхность.
+# Left click at nested Shell coordinates (Clutter virtual pointer).
+# Motion, press and release go in separate calls with pauses: GTK windows
+# ignore a click that arrives in the same batch as the pointer entering the surface.
 click() {
   local init="const {Clutter, GLib} = imports.gi;
     globalThis.__apPointer ??= Clutter.get_default_backend().get_default_seat()

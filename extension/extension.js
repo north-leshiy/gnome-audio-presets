@@ -9,12 +9,12 @@ import {HIDE_NATIVE_KEY} from './lib/settings.js';
 import {AudioIndicator} from './ui/indicator.js';
 import {NativeHider} from './ui/nativeHider.js';
 
-// Модуль импортируется один раз за жизнь Shell: всё состояние — в экземпляре,
-// создаётся в enable() и полностью снимается в disable().
+// The module is imported once per Shell lifetime: all state lives in the
+// instance, is created in enable() and fully torn down in disable().
 export default class AudioPresetsExtension extends Extension {
     enable() {
         this._settings = this.getSettings();
-        // Синглтон Shell: одно соединение с pulse на всех, закрывать его нельзя.
+        // Shell's singleton: one pulse connection for everyone, never close it.
         const mixer = getMixerControl();
 
         this._bluez = new BluezClient();

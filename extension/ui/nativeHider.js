@@ -1,9 +1,9 @@
-// Скрытие родных значков громкости на панели.
+// Hiding the built-in volume icons in the top bar.
 //
-// quickSettings._volumeOutput/_volumeInput — приватные поля Shell; их видимость
-// пересчитывает сам Shell (_syncIndicatorsVisible, bind_property), поэтому hide()
-// не держится. Снимаем актёров из контейнера _indicators и возвращаем на те же
-// места в restore(). Слайдеры внутри Quick Settings — другие актёры, их не трогаем.
+// quickSettings._volumeOutput/_volumeInput are private Shell fields, and the
+// Shell recomputes their visibility itself (_syncIndicatorsVisible, bind_property),
+// so hide() does not stick. The actors are removed from the _indicators container
+// and put back in place in restore(). Quick Settings sliders are other actors and stay.
 import GLib from 'gi://GLib';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -42,7 +42,7 @@ export class NativeHider {
         if (this._waitId)
             GLib.source_remove(this._waitId);
         this._waitId = 0;
-        // Возвращаем в обратном порядке, чтобы индексы совпали с исходными.
+        // Put them back in reverse order so the indexes match the original ones.
         for (const {box, actor, index} of this._removed.reverse()) {
             if (actor.get_parent())
                 continue;

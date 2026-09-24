@@ -1,5 +1,5 @@
-// Минимальный раннер для gjs-тестов: test() копит кейсы, run() печатает итог
-// и выходит с кодом 1 при падениях.
+// Minimal gjs test runner: test() collects cases, run() prints the summary
+// and exits with code 1 on failures.
 import System from 'system';
 
 const cases = [];

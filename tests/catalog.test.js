@@ -26,9 +26,9 @@ function setup({sinks = [], sources = [], bt = [], saved = []} = {}) {
     return {settings, mixer, bluez, catalog};
 }
 
-test('живые ноды попадают в каталог и запоминаются', () => {
+test('live nodes enter the catalog and are remembered', () => {
     const {catalog, settings} = setup({
-        sinks: [fakeStream(BS, 'Наушники'), fakeStream(`${BS}.monitor`)],
+        sinks: [fakeStream(BS, 'Headphones'), fakeStream(`${BS}.monitor`)],
         sources: [fakeStream(MIC, 'Studio Mic Mono')],
     });
     eq(catalog.list('output').map(e => e.key), [`output:${BS}`]);
@@ -37,9 +37,9 @@ test('живые ноды попадают в каталог и запомина
     eq(readDevices(settings).map(d => d.key), [`output:${BS}`, `input:${MIC}`]);
 });
 
-test('переподключение с новым id и суффиксом — то же устройство', () => {
+test('reconnect with a new id and a suffix is the same device', () => {
     const {catalog, mixer} = setup({
-        saved: [{direction: 'output', match: {nodeName: BS}, name: 'Наушники',
+        saved: [{direction: 'output', match: {nodeName: BS}, name: 'Headphones',
             icon: 'audio-headphones-symbolic'}],
     });
     eq(catalog.lookup(`output:${BS}`).present, false);
@@ -48,22 +48,22 @@ test('переподключение с новым id и суффиксом — 
     const e = catalog.lookup(`output:${BS}`);
     eq(e.present, true);
     eq(e.stream.id, s.id);
-    eq(e.displayName, 'Наушники');
+    eq(e.displayName, 'Headphones');
     eq(catalog.list('output').length, 1, 'no duplicate entry for suffixed node');
     catalog.destroy();
 });
 
-test('отключённое USB-устройство остаётся, но отсутствует', () => {
-    const s = fakeStream(BS, 'Наушники');
+test('an unplugged USB device stays but is absent', () => {
+    const s = fakeStream(BS, 'Headphones');
     const {catalog, mixer} = setup({sinks: [s]});
     mixer.removeSink(s);
     const e = catalog.lookup(`output:${BS}`);
     ok(e && !e.present);
-    eq(e.displayName, 'Наушники', 'falls back to lastDescription');
+    eq(e.displayName, 'Headphones', 'falls back to lastDescription');
     catalog.destroy();
 });
 
-test('привязанные BT без нод: выход и вход', () => {
+test('paired BT without nodes: output and input', () => {
     const {catalog} = setup({bt: [{address: MAC, name: 'BT Earbuds', paired: true,
         connected: false, hasOutput: true, hasInput: true}]});
     const out = catalog.lookup(`output:bt:${MAC}`);
@@ -75,7 +75,7 @@ test('привязанные BT без нод: выход и вход', () => {
     catalog.destroy();
 });
 
-test('BT-нода появилась — устройство присутствует, internal не дублируется', () => {
+test('BT node appeared: device present, internal node not duplicated', () => {
     const {catalog, mixer} = setup({bt: [{address: MAC, name: 'Earbuds', paired: true,
         connected: true, hasOutput: true, hasInput: false}]});
     mixer.addSink(fakeStream('bluez_output_internal.AA_BB_CC_DD_EE_01.1'));
@@ -85,19 +85,19 @@ test('BT-нода появилась — устройство присутств
     catalog.destroy();
 });
 
-test('пользовательское имя и иконка важнее системных', () => {
+test('user name and icon win over system ones', () => {
     const {catalog} = setup({
-        sinks: [fakeStream(PCI, 'Линейный выход')],
-        saved: [{direction: 'output', match: {nodeName: PCI}, name: 'Колонки',
+        sinks: [fakeStream(PCI, 'Line Out')],
+        saved: [{direction: 'output', match: {nodeName: PCI}, name: 'Speakers',
             icon: 'audio-speaker-cabinet-symbolic'}],
     });
     const e = catalog.lookup(`output:${PCI}`);
-    eq(e.displayName, 'Колонки');
+    eq(e.displayName, 'Speakers');
     eq(e.iconName, 'audio-speaker-cabinet-symbolic');
     catalog.destroy();
 });
 
-test('defaultKey по текущему default sink', () => {
+test('defaultKey follows the current default sink', () => {
     const a = fakeStream(BS);
     const b = fakeStream(PCI);
     const {catalog, mixer} = setup({sinks: [a, b]});
@@ -107,16 +107,16 @@ test('defaultKey по текущему default sink', () => {
     catalog.destroy();
 });
 
-test('автозапоминание не затирает правки prefs, сделанные во время ожидания', async () => {
+test('auto-remember does not overwrite prefs edits made while waiting', async () => {
     const {catalog, settings, mixer} = setup({
-        saved: [{direction: 'output', match: {nodeName: PCI}, lastDescription: 'Колонки'}],
+        saved: [{direction: 'output', match: {nodeName: PCI}, lastDescription: 'Speakers'}],
     });
-    mixer.addSink(fakeStream(BS, 'Наушники')); // запланирована запись
-    // prefs тем временем переименовал колонки
-    writeDevices(settings, [{direction: 'output', match: {nodeName: PCI}, name: 'Мои колонки'}]);
+    mixer.addSink(fakeStream(BS, 'Headphones')); // a write is now scheduled
+    // meanwhile prefs renamed the speakers
+    writeDevices(settings, [{direction: 'output', match: {nodeName: PCI}, name: 'My speakers'}]);
     await wait(2200);
     const devs = readDevices(settings);
-    eq(devs.find(d => d.key === `output:${PCI}`).name, 'Мои колонки');
+    eq(devs.find(d => d.key === `output:${PCI}`).name, 'My speakers');
     ok(devs.some(d => d.key === `output:${BS}`));
     catalog.destroy();
 });

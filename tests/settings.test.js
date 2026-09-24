@@ -19,14 +19,14 @@ function withWarnings(fn) {
     return warnings;
 }
 
-test('по умолчанию пусто', () => {
+test('empty by default', () => {
     const s = memorySettings();
     eq(S.readDevices(s), []);
     eq(S.readPresets(s), []);
     eq(s.get_uint(S.TIMEOUT_KEY), 15);
 });
 
-test('невалидный JSON: пустой список и предупреждение', () => {
+test('invalid JSON: empty list and a warning', () => {
     const s = memorySettings();
     s.set_string(S.PRESETS_KEY, '{not json');
     let presets;
@@ -35,18 +35,18 @@ test('невалидный JSON: пустой список и предупреж
     ok(w.some(m => m.includes('presets')), 'warning expected');
 });
 
-test('не массив: пустой список и предупреждение', () => {
+test('not an array: empty list and a warning', () => {
     const s = memorySettings();
     s.set_string(S.DEVICES_KEY, '{"a":1}');
     const w = withWarnings(() => eq(S.readDevices(s), []));
     eq(w.length, 1);
 });
 
-test('устройства: круговая запись без потерь, битые отброшены', () => {
+test('devices: round trip without loss, broken entries dropped', () => {
     const s = memorySettings();
     const devices = [
-        {direction: 'output', match: {nodeName: BS}, visible: true, name: 'Наушники',
-            icon: 'audio-headphones-symbolic', lastDescription: 'Наушники'},
+        {direction: 'output', match: {nodeName: BS}, visible: true, name: 'Headphones',
+            icon: 'audio-headphones-symbolic', lastDescription: 'Headphones'},
         {direction: 'output', match: {btAddress: 'aa:bb:cc:dd:ee:01'}, visible: false,
             name: '', icon: 'earbuds-symbolic', lastDescription: 'BT Earbuds'},
     ];
@@ -56,7 +56,7 @@ test('устройства: круговая запись без потерь, �
     eq(back[0].key, `output:${BS}`);
     eq(back[1].key, `output:bt:${MAC}`);
     eq(back[1].visible, false);
-    eq(back[0].name, 'Наушники');
+    eq(back[0].name, 'Headphones');
 
     s.set_string(S.DEVICES_KEY, JSON.stringify([...devices,
         {direction: 'sideways', match: {nodeName: 'x'}},
@@ -68,25 +68,25 @@ test('устройства: круговая запись без потерь, �
     eq(w.length, 2);
 });
 
-test('пресеты: ключи проверяются по направлению', () => {
+test('presets: keys are checked against the direction', () => {
     const s = memorySettings();
     S.writePresets(s, [{
-        id: 'podcast', name: 'Подкаст',
+        id: 'podcast', name: 'Podcast',
         output: `output:bt:${MAC}`,
-        input: `output:${BS}`, // не то направление
+        input: `output:${BS}`, // wrong direction
         fallbackOutput: 'garbage',
     }]);
     const [p] = S.readPresets(s);
-    eq(p, {id: 'podcast', name: 'Подкаст', output: `output:bt:${MAC}`,
+    eq(p, {id: 'podcast', name: 'Podcast', output: `output:bt:${MAC}`,
         input: null, fallbackOutput: null});
 });
 
-test('пресет без id получает id', () => {
+test('a preset without id gets one', () => {
     const p = S.normalizePreset({name: 'X'}, 3);
     ok(p.id.startsWith('preset-3-'));
 });
 
-test('запись без изменений не трогает ключ', () => {
+test('writing unchanged data does not touch the key', () => {
     const s = memorySettings();
     let changes = 0;
     s.connect(`changed::${S.PRESETS_KEY}`, () => changes++);
@@ -95,7 +95,7 @@ test('запись без изменений не трогает ключ', () =
     eq(changes, 1);
 });
 
-test('Debouncer схлопывает вызовы', async () => {
+test('Debouncer collapses calls', async () => {
     let calls = 0;
     const d = new S.Debouncer(30, () => calls++);
     d.schedule();

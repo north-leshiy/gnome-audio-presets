@@ -1,0 +1,47 @@
+name: Build and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gettext libglib2.0-bin jq zip shellcheck
+
+      - name: Lint shell scripts
+        run: shellcheck build.sh examples/*.sh tests/*.sh
+
+      - name: Build extension zip
+        run: |
+          if [[ $GITHUB_REF_TYPE == tag ]]; then
+            export VERSION_NAME=${GITHUB_REF_NAME#v}
+          fi
+          ./build.sh pack
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: audio-presets-extension
+          path: '*.shell-extension.zip'
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" ./*.shell-extension.zip \
+            --verify-tag --generate-notes --title "Audio Presets $GITHUB_REF_NAME"

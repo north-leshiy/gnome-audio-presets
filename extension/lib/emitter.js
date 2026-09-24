@@ -1,5 +1,5 @@
-// Минимальные сигналы для обычных классов: модули lib/ работают и вне Shell
-// (prefs, тесты), поэтому misc/signals.js из Shell здесь недоступен.
+// Minimal signals for plain classes: lib/ modules also run outside the Shell
+// (prefs, tests), where the Shell's misc/signals.js is not available.
 export class Emitter {
     #handlers = new Map();
     #nextId = 1;

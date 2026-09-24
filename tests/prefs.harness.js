@@ -1,6 +1,6 @@
-// Проверка редактора пресетов без кликов: prefs.js грузится в этом процессе,
-// кнопки нажимаются через дерево виджетов, настройки — в памяти.
-// Окно не показывается, но GTK нужен дисплей — используйте вложенный devkit:
+// Preset editor check without clicks: prefs.js is loaded into this process,
+// buttons are pressed through the widget tree, settings are kept in memory.
+// No window is shown, but GTK needs a display, so use a running devkit:
 //   GSETTINGS_BACKEND=memory LANGUAGE=en WAYLAND_DISPLAY=wayland-1 gjs -m tests/prefs.harness.js
 import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
@@ -25,8 +25,8 @@ const {ExtensionPreferences} = await import(
 Adw.init();
 
 const prefs = new Prefs(metadata);
-// Настоящее приложение находит расширение по каталогу с UUID в пути модуля;
-// здесь модуль лежит в extension/, поэтому gettext-обёртке подсказываем явно.
+// The real app finds the extension by the UUID directory in the module path;
+// here the module lives in extension/, so tell the gettext wrapper explicitly.
 ExtensionPreferences.lookupByURL = () => prefs;
 const settings = prefs.getSettings();
 const window = new Adw.PreferencesWindow();
@@ -49,20 +49,20 @@ settings.set_string('devices', JSON.stringify([
     {direction: 'output', match: {nodeName: PCI_OUT.slice(7)}, name: 'Speakers'},
 ]));
 
-test('пусто: подсказка и кнопка +', () => {
+test('empty: hint row and + button', () => {
     eq(readPresets(), []);
     ok(all(w => w instanceof Adw.ActionRow && w.title === 'No presets yet').length === 1);
     eq(buttons('Add preset').length, 1);
 });
 
-test('+ добавляет пресет', () => {
+test('+ adds a preset', () => {
     buttons('Add preset')[0].emit('clicked');
     const p = readPresets();
     eq(p.length, 1);
     eq(p[0].name, 'New preset');
 });
 
-test('выбор выхода в ComboRow записывается ключом', () => {
+test('choosing an output in the ComboRow stores its key', () => {
     const combo = all(w => w instanceof Adw.ComboRow && w.title === 'Output')[0];
     const labels = [...Array(combo.model.get_n_items()).keys()].map(i => combo.model.get_string(i));
     eq(labels, ['Headphones', 'Speakers']);
@@ -70,7 +70,7 @@ test('выбор выхода в ComboRow записывается ключом'
     eq(readPresets()[0].output, PCI_OUT);
 });
 
-test('запасной выход: «Нет» первым пунктом', () => {
+test('fallback output: "None" is the first entry', () => {
     const combo = all(w => w instanceof Adw.ComboRow && w.title === 'Fallback output')[0];
     eq(combo.model.get_string(0), 'None');
     combo.selected = 1;
@@ -79,14 +79,14 @@ test('запасной выход: «Нет» первым пунктом', () =
     eq(readPresets()[0].fallbackOutput, null);
 });
 
-test('переименование через EntryRow apply', () => {
+test('renaming through EntryRow apply', () => {
     const entry = all(w => w instanceof Adw.EntryRow && w.title === 'Name' && w.text === 'New preset')[0];
     entry.text = 'Speakers preset';
     entry.emit('apply');
     eq(readPresets()[0].name, 'Speakers preset');
 });
 
-test('порядок: вниз, вверх; крайние кнопки неактивны', () => {
+test('order: down, up; edge buttons are insensitive', () => {
     settings.set_string('presets', JSON.stringify([
         {id: 'a', name: 'A'}, {id: 'b', name: 'B'}, {id: 'c', name: 'C'}]));
     const down = buttons('Move down');
@@ -99,12 +99,12 @@ test('порядок: вниз, вверх; крайние кнопки неак
     eq(readPresets().map(p => p.id), ['b', 'c', 'a']);
 });
 
-test('удаление', () => {
+test('delete', () => {
     buttons('Delete preset')[1].emit('clicked');
     eq(readPresets().map(p => p.id), ['b', 'a']);
 });
 
-test('ссылка на неизвестное устройство видна как «Unknown device»', () => {
+test('a reference to an unknown device shows as "Unknown device"', () => {
     settings.set_string('presets', JSON.stringify([{id: 'x', name: 'X', output: 'output:nope'}]));
     const combo = all(w => w instanceof Adw.ComboRow && w.title === 'Output')[0];
     eq(combo.model.get_string(combo.selected), 'Unknown device');
@@ -113,11 +113,11 @@ test('ссылка на неизвестное устройство видна �
 const readDevice = key => JSON.parse(settings.get_string('devices'))
     .find(d => `${d.direction}:${d.match.nodeName}` === key);
 
-test('устройство: имя, иконка, видимость пишутся в настройки', () => {
+test('device: name, icon and visibility are written to settings', () => {
     const name = all(w => w instanceof Adw.EntryRow && w.title === 'Name' && w.text === 'Speakers')[0];
-    name.text = 'Колонки';
+    name.text = 'Speakers';
     name.emit('apply');
-    eq(readDevice(PCI_OUT).name, 'Колонки');
+    eq(readDevice(PCI_OUT).name, 'Speakers');
 
     const expander = name.get_ancestor(Adw.ExpanderRow);
     const icon = [...walk(expander)].find(w => w instanceof Adw.ComboRow && w.title === 'Icon');

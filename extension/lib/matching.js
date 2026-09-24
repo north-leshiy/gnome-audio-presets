@@ -1,16 +1,16 @@
-// Чистые функции идентификации устройств: без GI, общие для Shell, prefs и тестов.
+// Pure device identification helpers: no GI, shared by the Shell, prefs and tests.
 //
-// Ключ устройства — направление плюс стабильный признак:
-//   output:<node.name>        проводное устройство
-//   output:bt:<MAC>           Bluetooth, MAC в верхнем регистре через двоеточие
-// Числовые id нод PipeWire/Gvc в ключ не входят: они меняются при переподключении.
+// A device key is a direction plus a stable identifier:
+//   output:<node.name>        wired device
+//   output:bt:<MAC>           Bluetooth, upper-case MAC with colons
+// PipeWire/Gvc numeric node ids are not part of the key: they change on reconnect.
 
 export const OUTPUT = 'output';
 export const INPUT = 'input';
 
 const MAC_RE = /^[0-9A-F]{2}(:[0-9A-F]{2}){5}$/;
-// Публичная нода BT: bluez_output.AA:BB:CC:DD:EE:FF, иногда с суффиксом .N.
-// Внутренние bluez_output_internal.AA_BB_… сюда не попадают по форме имени.
+// Public BT node: bluez_output.AA:BB:CC:DD:EE:FF, sometimes with a .N suffix.
+// Internal bluez_output_internal.AA_BB_... nodes do not match by name shape.
 const BT_NODE_RE = /^bluez_(output|input)\.([0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5})(?:\.\d+)?$/;
 
 export function normalizeMac(mac) {
@@ -48,13 +48,13 @@ export function isMonitorNode(name) {
     return name.endsWith('.monitor');
 }
 
-/** Ноды, которые не показываем вовсе. */
+/** Nodes that are never shown. */
 export function isIgnoredNode(name) {
     return !name || isInternalNode(name) || isMonitorNode(name);
 }
 
 /**
- * MAC публичной BT-ноды нужного направления или null.
+ * MAC of the public BT node of the given direction, or null.
  *
  * @param {string} name
  * @param {string} [direction]
@@ -68,18 +68,18 @@ export function btAddressFromNodeName(name, direction) {
     return normalizeMac(m[2]);
 }
 
-/** Как устройство матчится по имени найденной ноды. */
+/** How a device is matched, given the name of the node found. */
 export function matchForNodeName(name) {
     const btAddress = btAddressFromNodeName(name);
     return btAddress ? {btAddress} : {nodeName: name};
 }
 
 /**
- * Совпадает ли имя ноды с сохранённым node.name с поправкой на суффикс,
- * который WirePlumber добавляет при гонках переподключения. Встречаются обе формы:
+ * Whether a node name matches a saved node.name, allowing for the suffix
+ * WirePlumber adds on reconnect races. Both forms occur:
  *   alsa_output.usb-X-00.analog-stereo  ~  alsa_output.usb-X-00.7.analog-stereo
  *   alsa_input.usb-X-00.mono-fallback   ~  alsa_input.usb-X-00.mono-fallback.2
- * Из сохранённого имени ничего не вырезаем: `pci-0000_00_1f.3` сам содержит `.3`.
+ * Nothing is cut from the saved name: `pci-0000_00_1f.3` itself contains `.3`.
  */
 export function isSuffixedVariant(savedName, candidate) {
     if (candidate.startsWith(`${savedName}.`) &&
@@ -98,8 +98,8 @@ export function isSuffixedVariant(savedName, candidate) {
 }
 
 /**
- * Выбрать ноду для устройства из списка имён одного направления.
- * Точное совпадение важнее суффиксного.
+ * Pick the node for a device from the names of one direction.
+ * An exact match wins over a suffixed one.
  *
  * @param {{nodeName?: string, btAddress?: string}} match
  * @param {string} direction

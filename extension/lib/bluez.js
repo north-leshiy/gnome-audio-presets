@@ -1,5 +1,5 @@
-// BlueZ через system D-Bus: список привязанных аудиоустройств и подключение.
-// Нет BlueZ или адаптера — список просто пуст, ошибок наружу не бросаем.
+// BlueZ over the system D-Bus: paired audio devices and connecting to them.
+// Without BlueZ or an adapter the list is simply empty; no errors are thrown.
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
@@ -19,7 +19,7 @@ function unpack(v) {
     return v instanceof GLib.Variant ? v.recursiveUnpack() : v;
 }
 
-/** Свойства Device1 в плоский объект устройства. */
+/** Flatten Device1 properties into a device object. */
 export function deviceFromProps(path, props) {
     const address = normalizeMac(unpack(props.Address));
     if (!address)
@@ -84,7 +84,7 @@ export class BluezClient extends Emitter {
         }
     }
 
-    /** Привязанные аудиоустройства. */
+    /** Paired audio devices. */
     get audioDevices() {
         return [...this._devices.values()].filter(isPairedAudio);
     }
@@ -95,8 +95,8 @@ export class BluezClient extends Emitter {
     }
 
     /**
-     * Подключить устройство. Резолвится после ответа BlueZ (а не появления
-     * ноды PipeWire — её ждёт вызывающий). Бросает ошибку с понятным текстом.
+     * Connect a device. Resolves when BlueZ replies (not when the PipeWire node
+     * appears; the caller waits for that). Throws an error with a readable message.
      */
     async connectDevice(address, cancellable = null) {
         const dev = this.lookup(address);

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Прогон gjs-тестов ядра (tests/*.test.js). Gvc лежит в приватном каталоге Shell.
+# Run the core gjs tests (tests/*.test.js). Gvc lives in the Shell's private directory.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 export GI_TYPELIB_PATH=/usr/lib/gnome-shell${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}

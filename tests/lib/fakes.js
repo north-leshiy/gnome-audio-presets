@@ -1,4 +1,4 @@
-// Подделки Gvc.MixerControl и BluezClient для тестов ядра.
+// Fakes of Gvc.MixerControl and BluezClient for the core tests.
 import Gvc from 'gi://Gvc';
 
 import {Emitter} from '../../extension/lib/emitter.js';
@@ -11,7 +11,7 @@ export function fakeStream(name, description = name, extra = {}) {
         volume: 30000, ...extra};
 }
 
-/** Имитирует сигналы и дефолты MixerControl. connect() возвращает id, как GObject. */
+/** Mimics MixerControl signals and defaults. connect() returns an id, like GObject. */
 export class FakeMixer extends Emitter {
     constructor({sinks = [], sources = []} = {}) {
         super();
