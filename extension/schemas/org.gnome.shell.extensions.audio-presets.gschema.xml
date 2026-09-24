@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="audio-presets">
+  <schema id="org.gnome.shell.extensions.audio-presets"
+          path="/org/gnome/shell/extensions/audio-presets/">
+    <key name="devices" type="s">
+      <default>'[]'</default>
+      <summary>Known audio devices</summary>
+      <description>JSON array of devices: key, direction, match, visible, name, icon, lastDescription.</description>
+    </key>
+    <key name="presets" type="s">
+      <default>'[]'</default>
+      <summary>Presets</summary>
+      <description>JSON array of presets: id, name, output, input, fallbackOutput (device keys).</description>
+    </key>
+    <key name="bt-connect-timeout" type="u">
+      <range min="3" max="120"/>
+      <default>15</default>
+      <summary>Bluetooth connect timeout, seconds</summary>
+    </key>
+    <key name="hide-native-indicators" type="b">
+      <default>true</default>
+      <summary>Hide the built-in volume icons in the top bar</summary>
+    </key>
+  </schema>
+</schemalist>

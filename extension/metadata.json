@@ -1,0 +1,12 @@
+{
+  "uuid": "audio-presets@north-leshiy.github.io",
+  "name": "Audio Presets",
+  "description": "Switch audio output and input together with one click, rename and hide devices, connect Bluetooth headphones on demand.",
+  "shell-version": [
+    "50"
+  ],
+  "version": 1,
+  "gettext-domain": "audio-presets",
+  "settings-schema": "org.gnome.shell.extensions.audio-presets",
+  "url": "https://github.com/north-leshiy/gnome-audio-presets"
+}

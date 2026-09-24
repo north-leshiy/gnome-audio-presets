@@ -1,0 +1,261 @@
+# Russian translations for audio-presets.
+# Copyright (C) 2026 Иван Поддубный
+# This file is distributed under the same license as the audio-presets project.
+# Иван Поддубный, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: audio-presets 1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-09-24 01:19+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Иван Поддубный\n"
+"Language: ru\n"
+"Language-Team: Russian\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || "
+"n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: lib/icons.js:24
+msgid "Headphones"
+msgstr "Наушники"
+
+#: lib/icons.js:25
+msgid "Headset"
+msgstr "Гарнитура"
+
+#: lib/icons.js:26
+msgid "Earbuds"
+msgstr "Вкладыши"
+
+#: lib/icons.js:27
+msgid "Speaker"
+msgstr "Колонка"
+
+#: lib/icons.js:28
+msgid "Loudspeaker"
+msgstr "Громкоговоритель"
+
+#: lib/icons.js:29
+msgid "Display"
+msgstr "Монитор"
+
+#: lib/icons.js:30
+msgid "TV"
+msgstr "Телевизор"
+
+#: lib/icons.js:31
+msgid "Computer"
+msgstr "Компьютер"
+
+#: lib/icons.js:32
+msgid "Sound card"
+msgstr "Звуковая карта"
+
+#: lib/icons.js:33 ui/streamSlider.js:68
+msgid "Microphone"
+msgstr "Микрофон"
+
+#: lib/icons.js:34
+msgid "Studio microphone"
+msgstr "Студийный микрофон"
+
+#: lib/icons.js:35
+msgid "Webcam"
+msgstr "Веб-камера"
+
+#: lib/icons.js:36
+msgid "Phone"
+msgstr "Телефон"
+
+#: lib/switcher.js:129
+#, python-format
+msgid "Could not apply “%s”"
+msgstr "Не удалось применить «%s»"
+
+#: lib/switcher.js:133
+msgid "The preset refers to a device that is not known."
+msgstr "Пресет ссылается на неизвестное устройство."
+
+#: lib/switcher.js:152
+#, python-format
+msgid "%s is not available"
+msgstr "%s недоступны"
+
+#: lib/switcher.js:153
+#, python-format
+msgid "%s. Switched to %s instead."
+msgstr "%s. Звук переключён на: %s."
+
+#: lib/switcher.js:168
+#, python-format
+msgid "Could not switch to %s"
+msgstr "Не удалось переключиться на %s"
+
+#: lib/switcher.js:201
+#, python-format
+msgid "%s is not connected"
+msgstr "%s: не подключено"
+
+#: lib/switcher.js:203
+msgid "Bluetooth is not available"
+msgstr "Bluetooth недоступен"
+
+#: lib/switcher.js:238
+#, python-format
+msgid "%s did not connect in %d seconds"
+msgstr "%s не подключились за %d с"
+
+#: lib/switcher.js:251
+#, python-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: prefs.js:67
+msgid "Icon"
+msgstr "Иконка"
+
+#: prefs.js:82
+msgid "Devices"
+msgstr "Устройства"
+
+#: prefs.js:104
+msgid "Outputs"
+msgstr "Выходы"
+
+#: prefs.js:104
+msgid "Inputs"
+msgstr "Входы"
+
+#: prefs.js:108
+msgid "Hidden devices are not shown in the menu. Names and icons are only used by this extension."
+msgstr "Скрытые устройства не показываются в меню. Имена и иконки видит только это расширение."
+
+#: prefs.js:132
+msgid "not connected"
+msgstr "не подключено"
+
+#: prefs.js:145
+msgid "Show in menu"
+msgstr "Показывать в меню"
+
+#: prefs.js:150 prefs.js:292
+msgid "Name"
+msgstr "Имя"
+
+#: prefs.js:169
+msgid "System name"
+msgstr "Системное имя"
+
+#: prefs.js:180
+#, python-format
+msgid "System description: %s"
+msgstr "Системное описание: %s"
+
+#: prefs.js:187 prefs.js:200
+msgid "Presets"
+msgstr "Пресеты"
+
+#: prefs.js:191
+msgid "General"
+msgstr "Общее"
+
+#: prefs.js:193
+msgid "Hide built-in volume icons"
+msgstr "Скрывать встроенные значки громкости"
+
+#: prefs.js:194
+msgid "The volume sliders in Quick Settings stay in place"
+msgstr "Слайдеры громкости в быстрых настройках остаются"
+
+#: prefs.js:201
+msgid ""
+"A preset switches output and input together. The fallback output is used when the main one does "
+"not connect in time."
+msgstr ""
+"Пресет переключает выход и вход одновременно. Запасной выход используется, если основной не "
+"подключился вовремя."
+
+#: prefs.js:205
+msgid "Add preset"
+msgstr "Добавить пресет"
+
+#: prefs.js:231
+msgid "No presets yet"
+msgstr "Пресетов пока нет"
+
+#: prefs.js:232
+msgid "Use the + button to add one"
+msgstr "Добавьте кнопкой +"
+
+#: prefs.js:247
+msgid "New preset"
+msgstr "Новый пресет"
+
+#: prefs.js:256
+msgid "None"
+msgstr "Нет"
+
+#: prefs.js:260
+msgid "Unknown device"
+msgstr "Неизвестное устройство"
+
+#: prefs.js:300
+msgid "Fallback output"
+msgstr "Запасной выход"
+
+#: prefs.js:319
+msgid "Move up"
+msgstr "Выше"
+
+#: prefs.js:321
+msgid "Move down"
+msgstr "Ниже"
+
+#: prefs.js:323
+msgid "Delete preset"
+msgstr "Удалить пресет"
+
+#: ui/indicator.js:20 ui/indicator.js:63
+msgid "Audio Presets"
+msgstr "Пресеты звука"
+
+#: ui/menu.js:94
+msgid "No presets yet. Open settings to add one."
+msgstr "Пресетов пока нет. Откройте настройки, чтобы добавить."
+
+#: prefs.js:298 ui/menu.js:98
+msgid "Output"
+msgstr "Выход"
+
+#: prefs.js:299 ui/menu.js:103
+msgid "Input"
+msgstr "Вход"
+
+#: ui/menu.js:109
+msgid "Audio Presets Settings"
+msgstr "Настройки пресетов звука"
+
+#: prefs.js:270 ui/menu.js:156
+msgid "Unnamed preset"
+msgstr "Пресет без имени"
+
+#: ui/streamSlider.js:68
+msgid "Volume"
+msgstr "Громкость"
+
+#: ui/streamSlider.js:175
+msgid "Volume changed"
+msgstr "Громкость изменена"
+
+#: ui/streamSlider.js:184
+msgid "Unmute"
+msgstr "Включить звук"
+
+#: ui/streamSlider.js:184
+msgid "Mute"
+msgstr "Выключить звук"
+

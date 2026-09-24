@@ -1,0 +1,59 @@
+/* St — подмножество CSS: нет flex/grid, opacity, dashed-границ.
+   Полупрозрачность отсутствующих устройств задаётся из кода. */
+
+.audio-presets-panel-slash {
+    padding: 0 1px;
+    font-weight: bold;
+}
+
+.audio-presets-menu {
+    min-width: 22em;
+}
+
+.audio-presets-row {
+    spacing: 6px;
+    padding: 3px 0;
+}
+
+.audio-presets-tile {
+    border-radius: 12px;
+    padding: 8px 6px;
+    background-color: rgba(127, 127, 127, 0.15);
+}
+
+.audio-presets-tile:hover,
+.audio-presets-tile:focus {
+    background-color: rgba(127, 127, 127, 0.28);
+}
+
+.audio-presets-tile:checked {
+    background-color: -st-accent-color;
+    color: -st-accent-fg-color;
+}
+
+.audio-presets-tile:checked:hover {
+    background-color: st-lighten(-st-accent-color, 5%);
+}
+
+.audio-presets-tile.audio-presets-pending {
+    border: 2px solid -st-accent-color;
+    padding: 6px 4px;
+}
+
+.audio-presets-icon {
+    icon-size: 16px;
+}
+
+.audio-presets-slash {
+    padding: 0 3px;
+}
+
+.audio-presets-tile-label {
+    padding-top: 4px;
+    font-size: 0.9em;
+}
+
+.audio-presets-slider-label {
+    font-size: 0.9em;
+    padding-left: 4px;
+}
