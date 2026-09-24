@@ -90,7 +90,13 @@ start() {
     "${DEVKIT_SEED:-$ROOT/examples/setup-example.sh}" >/dev/null
   fi
 
-  gnome-shell --devkit --wayland >"$LOG" 2>&1 &
+  # DEVKIT_HEADLESS=1 — без окна на экране, с виртуальным монитором: так
+  # надёжнее для скриншотов окон GTK (во вложенном режиме они иногда не рисуются).
+  if [[ -n ${DEVKIT_HEADLESS:-} ]]; then
+    gnome-shell --headless --virtual-monitor 1280x800 --wayland --no-x11 >"$LOG" 2>&1 &
+  else
+    gnome-shell --devkit --wayland >"$LOG" 2>&1 &
+  fi
   echo $! >>"$PIDS_FILE"
   # ждём, пока Shell займёт имя на шине
   local _
@@ -129,16 +135,20 @@ shell_eval() {
 }
 
 # Клик левой кнопкой в координатах вложенного Shell (виртуальный указатель Clutter).
+# Движение, нажатие и отпускание — отдельными вызовами с паузами: окна GTK
+# игнорируют клик, пришедший в одном пакете с входом указателя на поверхность.
 click() {
-  shell_eval "
-    const {Clutter, GLib} = imports.gi;
+  local init="const {Clutter, GLib} = imports.gi;
     globalThis.__apPointer ??= Clutter.get_default_backend().get_default_seat()
       .create_virtual_device(Clutter.InputDeviceType.POINTER_DEVICE);
-    const p = globalThis.__apPointer, t = GLib.get_monotonic_time();
-    p.notify_absolute_motion(t, $1, $2);
-    p.notify_button(t + 20000, Clutter.BUTTON_PRIMARY, Clutter.ButtonState.PRESSED);
-    p.notify_button(t + 40000, Clutter.BUTTON_PRIMARY, Clutter.ButtonState.RELEASED);
-    'ok'" >/dev/null
+    const p = globalThis.__apPointer, t = GLib.get_monotonic_time();"
+  shell_eval "$init p.notify_absolute_motion(t, $1 - 1, $2); 'ok'" >/dev/null
+  sleep 0.2
+  shell_eval "$init p.notify_absolute_motion(t, $1, $2); 'ok'" >/dev/null
+  sleep 0.2
+  shell_eval "$init p.notify_button(t, Clutter.BUTTON_PRIMARY, Clutter.ButtonState.PRESSED); 'ok'" >/dev/null
+  sleep 0.1
+  shell_eval "$init p.notify_button(t, Clutter.BUTTON_PRIMARY, Clutter.ButtonState.RELEASED); 'ok'" >/dev/null
 }
 
 shot() {

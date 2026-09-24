@@ -50,7 +50,8 @@ function iconId(dev) {
 /** Выпадающий список с иконками из курированного набора. */
 function makeIconRow(currentId, onChange) {
     const ids = ICONS.map(i => i.id);
-    const model = Gtk.StringList.new(ICONS.map(i => _(i.label)));
+    const labels = ICONS.map(i => _(i.label));
+    const model = Gtk.StringList.new(labels);
     const factory = new Gtk.SignalListItemFactory();
     factory.connect('setup', (f, item) => {
         const box = new Gtk.Box({spacing: 8});
@@ -59,10 +60,12 @@ function makeIconRow(currentId, onChange) {
         item.set_child(box);
     });
     factory.connect('bind', (f, item) => {
+        // Для выбранного значения в самой строке get_position() не соответствует
+        // модели, поэтому иконку ищем по подписи.
+        const label = item.get_item().get_string();
         const box = item.get_child();
-        const pos = item.get_position();
-        box.get_first_child().set_from_gicon(giconFor(ids[pos]));
-        box.get_last_child().label = item.get_item().get_string();
+        box.get_first_child().set_from_gicon(giconFor(ids[labels.indexOf(label)]));
+        box.get_last_child().label = label;
     });
     const row = new Adw.ComboRow({title: _('Icon'), model, factory});
     const idx = ids.indexOf(currentId);

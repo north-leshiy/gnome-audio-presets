@@ -61,6 +61,11 @@ or *Audio Presets Settings* at the bottom of the menu):
 - **Presets** — add, reorder and delete presets; pick an output, an input and an
   optional fallback output.
 
+<p align="center">
+  <img src="docs/prefs-presets.png" alt="Presets page" width="400">
+  <img src="docs/prefs-devices.png" alt="Devices page" width="400">
+</p>
+
 A scripted setup is in [`examples/setup-example.sh`](examples/setup-example.sh):
 put your device names into the variables at the top and run it.
 
@@ -124,7 +129,9 @@ tests/devkit.sh shot /tmp/shot.png
 tests/devkit.sh stop
 ```
 
-`tests/devkit.sh` needs `mutter-dev-bin`. It starts a separate D-Bus session, dconf
+`tests/devkit.sh` needs `mutter-dev-bin`. With `DEVKIT_HEADLESS=1` it runs the Shell
+without a window, on a virtual monitor — more reliable for screenshots of GTK windows.
+It starts a separate D-Bus session, dconf
 database and extensions directory, and refuses to continue if your real
 `~/.config/dconf/user` would be touched. `tests/devkit-helper` turns on unsafe mode
 (Eval and Screenshot over D-Bus) **inside the nested Shell only** — never install it
