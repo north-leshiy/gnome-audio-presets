@@ -118,9 +118,9 @@ stop() {
   local shell_pid bus_pid
   bus_pid=$(sed -n 1p "$PIDS_FILE")
   shell_pid=$(sed -n 2p "$PIDS_FILE")
-  [[ -n $shell_pid ]] && kill "$shell_pid" 2>/dev/null || true
+  if [[ -n $shell_pid ]]; then kill "$shell_pid" 2>/dev/null || true; fi
   sleep 1
-  [[ -n $bus_pid ]] && kill "$bus_pid" 2>/dev/null || true
+  if [[ -n $bus_pid ]]; then kill "$bus_pid" 2>/dev/null || true; fi
   : >"$PIDS_FILE"
   : >"$BUS_FILE"
   echo "devkit stopped"
