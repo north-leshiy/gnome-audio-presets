@@ -1,6 +1,7 @@
 // Popup menu content: preset tiles, device tiles and volume sliders.
 // The tiles are few, so they are rebuilt on every catalog or preset change.
 import Clutter from 'gi://Clutter';
+import Pango from 'gi://Pango';
 import St from 'gi://St';
 
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
@@ -63,11 +64,15 @@ function makeTile({icons, label, checked, pending, dim, onClick, accessibleName}
         iconRow.add_child(icon);
     });
     content.add_child(iconRow);
-    content.add_child(new St.Label({
-        text: pending ? `${label}…` : label,
+    // "Connecting" is shown by the border alone: changing the text would change
+    // the tile width and make the menu jump.
+    const text = new St.Label({
+        text: label,
         style_class: 'audio-presets-tile-label',
         x_align: Clutter.ActorAlign.CENTER,
-    }));
+    });
+    text.clutter_text.ellipsize = Pango.EllipsizeMode.END;
+    content.add_child(text);
 
     const button = new St.Button({
         child: content,
@@ -77,6 +82,11 @@ function makeTile({icons, label, checked, pending, dim, onClick, accessibleName}
         checked,
         accessible_name: accessibleName ?? label,
     });
+    // Zero width request: the row then splits the menu width equally between
+    // its x_expand tiles, and a long name is ellipsized instead of widening it.
+    // Both are needed: Clutter aborts the Shell if natural width < minimum.
+    button.min_width = 0;
+    button.natural_width = 0;
     if (pending)
         button.add_style_class_name('audio-presets-pending');
     if (dim)
